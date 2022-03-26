@@ -10,13 +10,14 @@ public class JumpFloodAlgorithmTex : JumpFloodAlgorithmBase<Texture2D>
 
     public static string SavePath => JFAConfig.SavePath;
 
-    public JumpFloodAlgorithmTex(Texture2D seedTexture, JFAConfig configParameters) : base(seedTexture, configParameters)
+    public JumpFloodAlgorithmTex(Texture2D seedTexture, JFAConfig configParameters) : base(seedTexture,
+        configParameters)
     {
         if (recordProcess)
         {
             seedTexture.name = string.Format(SaveFileName, "0");
             CreateDirectory();
-            seedTexture.SaveTextureAsPng(SavePath);
+            seedTexture.SaveAsPng(SavePath);
         }
     }
 
@@ -26,13 +27,12 @@ public class JumpFloodAlgorithmTex : JumpFloodAlgorithmBase<Texture2D>
         base.Pass(pass, sourceId, destId);
         if (recordProcess)
         {
-            Object.DestroyImmediate(GetTexture(pass, destId).SaveTextureAsPng(SavePath));
+            Object.DestroyImmediate(GetTexture(pass, destId).SaveAsPng(SavePath));
         }
     }
 
     private Texture2D GetTexture(int passNumber, RenderTexture source)
     {
-        var passn = (int) Mathf.Clamp(passNumber, 0.0f, this.passes);
         var Height = seedTexture.height;
         var Width = seedTexture.width;
         var processTexture = new Texture2D(Width, Height, TextureFormat.RGBA32, false, true)

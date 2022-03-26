@@ -72,12 +72,6 @@ namespace JFA.scripts.editor
         {
             Texture2D tex = LoadTexture(displayedTexture);
             if (tex == null) return;
-
-            float AR = (float) tex.width / tex.height;
-            Rect pixelRect = GUILayoutUtility.GetAspectRect(AR);
-            var height = Mathf.Abs(position.yMax - pixelRect.position.y) * 0.75f;
-            var width = height * AR;
-
             TryDrawSaveButton(tex);
         }
 
@@ -119,7 +113,8 @@ namespace JFA.scripts.editor
                 RenderTexture.active = temp;
                 tex2.ReadPixels(new Rect(0, 0, temp.width, temp.height), 0, 0);
                 tex2.Apply();
-                tex2.SaveTextureAsPng($"{Application.dataPath}/JFA/");
+                tex2.SaveAsPng($"{Application.dataPath}/JFA/");
+                tex2.SaveAsJpg($"{Application.dataPath}/JFA/");
                 RenderTexture.active = null;
                 temp.Release();
             }
