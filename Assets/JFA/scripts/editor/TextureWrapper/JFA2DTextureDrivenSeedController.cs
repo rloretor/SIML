@@ -41,33 +41,6 @@ namespace JFA.editor
             base.PaintSeeds();
 
             Color[] pixelBuffer = sourceTexture.GetPixels();
-            Dictionary<Color, List<Vector2>> colorToPositions = new Dictionary<Color, List<Vector2>>();
-            for (int i = 0; i < pixelBuffer.Length; i++)
-            {
-                Color c = pixelBuffer[i];
-                if (c.a == 0)
-                {
-                    continue;
-                }
-
-                if (colorToPositions.ContainsKey(c) == false)
-                {
-                    colorToPositions[c] = new List<Vector2>();
-                }
-
-                float row = (float) i / sourceTexture.width;
-                float column = i % sourceTexture.width;
-                colorToPositions[c].Add(new Vector2(column / sourceTexture.width, row / sourceTexture.height));
-            }
-
-            foreach (KeyValuePair<Color, List<Vector2>> pair in colorToPositions)
-            {
-                Vector2 average = colorToPositions[pair.Key].Aggregate(new Vector2(0, 0), (s, v) => s + v) /
-                                  (float) colorToPositions[pair.Key].Count;
-                colorToPositions[pair.Key].Add(average);
-            }
-
-            var keysList = colorToPositions.Keys.ToList();
             for (int i = 0; i < pixelBuffer.Length; i++)
             {
                 Color c = pixelBuffer[i];
@@ -77,11 +50,10 @@ namespace JFA.editor
                     continue;
                 }
 
-                Vector2 pos = colorToPositions[pixelBuffer[i]].Last();
                 float row = (float) i / sourceTexture.width;
-                float column = i % sourceTexture.width;
+                float column = (float) i % sourceTexture.width;
                 pixelBuffer[i] = new Color((column) / sourceTexture.width, (row) / sourceTexture.height,
-                    (keysList.IndexOf(pixelBuffer[i]) + 1.0f) / colorToPositions.Keys.Count, 0);
+                    (float) i / pixelBuffer.Length, 0);
             }
 
             seed.SetPixels(pixelBuffer);

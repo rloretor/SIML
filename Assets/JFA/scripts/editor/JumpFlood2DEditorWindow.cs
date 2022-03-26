@@ -35,15 +35,13 @@ namespace JFA.scripts.editor
         private JFAConfig _config;
         private JumpFloodAlgorithmTex JFA = null;
         private Material UDFMaterial;
-        private Shader JFAShader;
         private readonly Dictionary<string, Texture2D> loadedTextures = new Dictionary<string, Texture2D>();
         private readonly string[] DebugTypes = {"show cell", "showDistance", "filterDistance", "boxFilterDistance"};
 
-        [MenuItem("Window/JFA/GenerateSDF")]
-        private void ShowWindow()
-        {
-            JFAShader = Shader.Find("JFA_Analysis");
 
+        [MenuItem("Window/JFA/GenerateSDF")]
+        private static void ShowWindow()
+        {
             var window = GetWindow<JumpFlood2DEditorWindow>();
             window.titleContent = new GUIContent("Jump Flooding Algorithm");
             window.Show();
@@ -54,7 +52,7 @@ namespace JFA.scripts.editor
             if (savedTextureCount == 0) return;
             if (UDFMaterial == null)
             {
-                UDFMaterial = new Material(JFAShader) {hideFlags = HideFlags.HideAndDontSave};
+                UDFMaterial = new Material(Shader.Find("JFA_Analysis")) {hideFlags = HideFlags.HideAndDontSave};
             }
 
             DrawTextureHandlers(savedTextureCount);
