@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using JFA.editor;
 using UnityEditor;
-using UnityEditor.Experimental.UIElements.GraphView;
 using UnityEngine;
 
 namespace JFA.scripts.editor
@@ -36,7 +35,9 @@ namespace JFA.scripts.editor
         private JumpFloodAlgorithmTex JFA = null;
         private Material UDFMaterial;
         private readonly Dictionary<string, Texture2D> loadedTextures = new Dictionary<string, Texture2D>();
-        private readonly string[] DebugTypes = {"show cell", "showDistance", "filterDistance", "boxFilterDistance"};
+
+        private readonly string[] DebugTypes =
+            {"show cell", "showDistance", "filterDistance", "boxFilterDistance", "flow"};
 
 
         [MenuItem("Window/JFA/GenerateSDF")]
@@ -133,8 +134,8 @@ namespace JFA.scripts.editor
             EditorGUILayout.EndHorizontal();
             EditorUtils.DrawUILine(Color.gray, 1, 15);
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("Zoom");
-            scale = EditorGUILayout.Slider(scale, 1, 0);
+            //EditorGUILayout.LabelField("Zoom");
+            //scale = EditorGUILayout.Slider(scale, 1, 0);
             EditorGUILayout.EndHorizontal();
             EditorUtils.DrawUILine(Color.gray, 1, 15);
 

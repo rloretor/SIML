@@ -1,0 +1,41 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel LemmingsMovementPassKernel
+
+struct Lemming
+{
+    float2 Position;
+    float2 Velocity;
+};
+
+RWStructuredBuffer<Lemming> _Lemmings;
+
+
+cbuffer once {
+float2 _MaxBound;
+float2 _MinBound;
+float _DeltaTime;
+float _Time;
+};
+
+[numthreads(512,1,1)]
+void LemmingsMovementPassKernel(uint3 id : SV_DispatchThreadID)
+{
+    Lemming lemming = _Lemmings[id.x];
+
+    //if (lemming.Position.x < _MaxBound.x &&
+    //    lemming.Position.x > _MinBound.x &&
+    //    lemming.Position.y < _MaxBound.y &&
+    //    lemming.Position.y > _MinBound.y)
+    //{
+    lemming.Position += lemming.Velocity * _DeltaTime;
+    _Lemmings[id.x].Position = lemming.Position;
+    // }
+    //else
+    //{
+    //    _Lemmings[id.x].Velocity.x = lemming.Position.x > _MaxBound.x ? -lemming.Velocity.x : lemming.Velocity;
+    //    _Lemmings[id.x].Velocity.x = lemming.Position.x < _MinBound.x ? -lemming.Velocity.x : lemming.Velocity;
+    //
+    //    _Lemmings[id.x].Velocity.y = lemming.Position.y > _MaxBound.y ? -lemming.Velocity.y : lemming.Velocity;
+    //    _Lemmings[id.x].Velocity.y = lemming.Position.y < _MinBound.y ? -lemming.Velocity.y : lemming.Velocity;
+    //}
+}

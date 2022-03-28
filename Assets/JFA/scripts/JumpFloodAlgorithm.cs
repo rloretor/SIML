@@ -2,17 +2,16 @@
 using UnityEngine;
 
 [Serializable]
-public class JumpFloodAlgorithmBase<T>
-    where T : Texture
+public class JumpFloodAlgorithmBase<T> where T : Texture
 {
     public T SeedTexture => seedTexture;
+    private int passID = Shader.PropertyToID("_pass");
+    private int maxPassID = Shader.PropertyToID("_maxPasses");
 
     protected Material JFAMat;
     protected Shader JFA;
-
     protected T seedTexture;
-    private int passID = Shader.PropertyToID("_pass");
-    private int maxPassID = Shader.PropertyToID("_maxPasses");
+
     protected int passes;
     protected JFAConfig config;
     protected bool recordProcess => config.RecordProcess;
@@ -20,18 +19,17 @@ public class JumpFloodAlgorithmBase<T>
     protected int maxPasses => config.MaxPasses;
 
 
-    public int Passes => passes;
-
     public JumpFloodAlgorithmBase(T seedTexture, JFAConfig configParameters)
     {
         this.seedTexture = seedTexture;
         this.config = configParameters;
-        ComputePasses();
         InitMaterial();
     }
 
     public virtual void Compute()
     {
+        ComputePasses();
+
         var Height = seedTexture.height;
         var Width = seedTexture.width;
         var source = RenderTexture.GetTemporary(Width, Height, 0);
