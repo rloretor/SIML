@@ -10,10 +10,13 @@ RWStructuredBuffer<Lemming> _Lemmings;
 
 cbuffer once {float2 _MaxBound; float2 _MinBound; float _DeltaTime; float _Time;};
 
+#define Gravity  9.8
+
 [numthreads(512,1,1)]
 void LemmingsMovementPassKernel(uint3 id : SV_DispatchThreadID)
 {
     Lemming lemming = _Lemmings[id.x];
+    lemming.Velocity.y -= Gravity * _DeltaTime;
 
     lemming.Velocity.x = lemming.Position.x >= _MaxBound.x ? -lemming.Velocity.x : lemming.Velocity.x;
     lemming.Velocity.x = lemming.Position.x <= _MinBound.x ? -lemming.Velocity.x : lemming.Velocity.x;

@@ -9,6 +9,7 @@ Shader "Instanced/LemmingInstanced"
         }
         LOD 100
         ZWrite On
+        // Cull off
         Pass
         {
             CGPROGRAM
@@ -68,14 +69,16 @@ Shader "Instanced/LemmingInstanced"
             v2f vert(appdata v, uint instanceID : SV_InstanceID)
             {
                 v2f o;
-                const Lemming boid = _LemmingsBuffer[instanceID];
+                const Lemming lemming = _LemmingsBuffer[instanceID];
 
                 const float3 localSpaceCameraPos = mul(unity_WorldToObject, float4(_WorldSpaceCameraPos.xyz, 1));
-                //float3 camVect = normalize(float3(boid.Position.xy, 1) - localSpaceCameraPos);
-                const float4x4 rot = lookAtMatrix(v.vertex - localSpaceCameraPos, float3(0, 1, 0));
+                //  float3 camVect = normalize(float3(lemming.Position.xy, 1) - localSpaceCameraPos);
+                //const float4x4 rot = lookAtMatrix(v.vertex - localSpaceCameraPos, float3(0, 1, 0));
+                //  v.vertex.xz = mul(Rot(acos(_Time.y)), v.vertex.xz);
+                v.vertex.y += 0.5;
                 v.vertex.xyz *= (5);
-                v.vertex = mul(rot, v.vertex);
-                v.vertex.xyz += float3(boid.Position, 0);
+                // v.vertex = mul(rot, v.vertex);
+                v.vertex.xyz += float3(lemming.Position, 0);
 
                 //o.wPos = v.vertex;
                 //o.sphereWPos = boid.position;

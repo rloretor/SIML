@@ -1,4 +1,3 @@
-
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -13,6 +12,16 @@ namespace Lemmings
         {
             PrepareComputeShader();
             RenderingModel.Init(SimulationModel);
+            SetCamera();
+        }
+
+        private void SetCamera()
+        {
+            var position = Camera.main.gameObject.transform.position;
+            position = SimulationModel.Bounds.Center();
+            position -= Vector3.forward;
+            Camera.main.gameObject.transform.position = position;
+            Camera.main.orthographicSize = SimulationModel.Bounds.sizeDelta.y / 2;
         }
 
 

@@ -40,7 +40,7 @@ namespace Lemmings
             for (var i = 0; i < LemmingInstances; i++)
             {
                 var pos = Bounds.RandomPointInBounds();
-                var vel = Vector2.right;
+                var vel = Vector2.right + (Vector2.right * UnityEngine.Random.Range(0, 100));
                 lemmingList.Add(new LemmingKinematicModel()
                 {
                     Position = pos,
