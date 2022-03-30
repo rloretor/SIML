@@ -7,24 +7,46 @@ struct Lemming
 };
 
 RWStructuredBuffer<Lemming> _Lemmings;
+Texture2D _collisionBitMap;
+SamplerState _linearClampSampler;
 
 cbuffer once {float2 _MaxBound; float2 _MinBound; float _DeltaTime; float _Time;};
 
 #define Gravity  9.8
 
+float2 computeUV(float2 position)
+{
+    return (position - _MinBound) / (_MaxBound - _MinBound);
+}
+
+//https://github.com/ashima/webgl-noise/blob/master/src/noise2D.glsl
+float hash(float2 x)
+{
+    return frac(sin(dot(x, float2(12.9898, 78.233))) * 43758.5453);
+}
+
 [numthreads(512,1,1)]
 void LemmingsMovementPassKernel(uint3 id : SV_DispatchThreadID)
 {
     Lemming lemming = _Lemmings[id.x];
+
     lemming.Velocity.y -= Gravity * _DeltaTime;
 
-    lemming.Velocity.x = lemming.Position.x >= _MaxBound.x ? -lemming.Velocity.x : lemming.Velocity.x;
-    lemming.Velocity.x = lemming.Position.x <= _MinBound.x ? -lemming.Velocity.x : lemming.Velocity.x;
+    float2 projectedPosition = lemming.Position + lemming.Velocity * _DeltaTime;
 
-    lemming.Velocity.y = lemming.Position.y >= _MaxBound.y ? -lemming.Velocity.y : lemming.Velocity.y;
-    lemming.Velocity.y = lemming.Position.y <= _MinBound.y ? -lemming.Velocity.y : lemming.Velocity.y;
+    lemming.Velocity.x = projectedPosition.x >= _MaxBound.x ? -lemming.Velocity.x : lemming.Velocity.x;
+    lemming.Velocity.x = projectedPosition.x <= _MinBound.x ? -lemming.Velocity.x : lemming.Velocity.x;
 
-    lemming.Position += lemming.Velocity * _DeltaTime;
+    lemming.Velocity.y = projectedPosition.y >= _MaxBound.y ? -lemming.Velocity.y : lemming.Velocity.y;
+    lemming.Velocity.y = projectedPosition.y <= _MinBound.y ? -lemming.Velocity.y : lemming.Velocity.y;
+
+
+    float2 uv = computeUV(projectedPosition);
+    const bool isProjectedCollision = round(_collisionBitMap.SampleLevel(_linearClampSampler, uv, 0).a);
+
+    lemming.Position = isProjectedCollision
+                           ? _MinBound + hash(float2(id.x * _Time / 2, _Time)) * (_MaxBound - _MinBound)
+                           : projectedPosition;
     lemming.Position = clamp(lemming.Position, _MinBound, _MaxBound);
 
     _Lemmings[id.x] = lemming;

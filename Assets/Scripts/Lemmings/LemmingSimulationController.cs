@@ -5,23 +5,22 @@ namespace Lemmings
 {
     public class LemmingSimulationController : MonoBehaviour
     {
+        public Canvas Canvas;
+        public Texture2D collisionBitmap;
         public LemmingSimulationModel SimulationModel;
         public LemmingRenderingModel RenderingModel;
 
         private void Start()
         {
+            SetCanvas();
             PrepareComputeShader();
             RenderingModel.Init(SimulationModel);
-            SetCamera();
         }
 
-        private void SetCamera()
+        private void SetCanvas()
         {
-            var position = Camera.main.gameObject.transform.position;
-            position = SimulationModel.Bounds.Center();
-            position -= Vector3.forward;
-            Camera.main.gameObject.transform.position = position;
-            Camera.main.orthographicSize = SimulationModel.Bounds.sizeDelta.y / 2;
+            Canvas.renderMode = RenderMode.ScreenSpaceCamera;
+            Canvas.worldCamera = Camera.main;
         }
 
 
@@ -45,6 +44,7 @@ namespace Lemmings
             SimulationModel.SimulationShader.SetVector("_MinBound", SimulationModel.Bounds.BotLeft());
             SimulationModel.SimulationShader.SetFloat("_DeltaTime", Time.deltaTime);
             SimulationModel.SimulationShader.SetFloat("_Time", Time.time);
+            SimulationModel.SimulationShader.SetTexture(SimulationModel.ComputeKernel, "_collisionBitMap", collisionBitmap);
         }
 
         private void Simulate()

@@ -388,7 +388,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1733066147
 RectTransform:
   m_ObjectHideFlags: 0
@@ -493,10 +493,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ab4a7f3361f749b0bc279ed0980deb5f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Canvas: {fileID: 1348752546}
+  collisionBitmap: {fileID: 2800000, guid: 5301e80ae2f194b1b8e25637692fb697, type: 3}
   SimulationModel:
     SimulationShader: {fileID: 7200000, guid: 47cc7675f257f4061864b9f1da33e7f5, type: 3}
     Bounds: {fileID: 1348752547}
-    LemmingInstances: 512
+    LemmingInstances: 1048576
   RenderingModel:
     LemmingMesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
     LemmingInstancedShader: {fileID: 4800000, guid: 3147f2f01ac84f9e854a982a919feb9b,
@@ -518,7 +520,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1929876870
 RectTransform:
   m_ObjectHideFlags: 0
