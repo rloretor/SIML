@@ -76,7 +76,8 @@ Shader "Instanced/LemmingInstanced"
                 //const float4x4 rot = lookAtMatrix(v.vertex - localSpaceCameraPos, float3(0, 1, 0));
                 //  v.vertex.xz = mul(Rot(acos(_Time.y)), v.vertex.xz);
                 v.vertex.y += 0.5;
-                v.vertex.xyz *= (5);
+                v.vertex.x *= (5);
+                v.vertex.y *= (10);
                 // v.vertex = mul(rot, v.vertex);
                 v.vertex.xyz += float3(lemming.Position, 0);
 

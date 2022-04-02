@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 using Random = UnityEngine.Random;
 
 namespace JFA.editor
@@ -74,9 +75,9 @@ namespace JFA.editor
             return newVal;
         }
 
-        public override void PaintSeeds()
+        public override void PaintSeeds(GraphicsFormat format = GraphicsFormat.R8G8B8A8_UNorm)
         {
-            base.PaintSeeds();
+            base.PaintSeeds(format);
             int total = seed.width * seed.height;
             Color[] colors = new Color [total];
             for (var index = 0; index < colors.Length; index++)

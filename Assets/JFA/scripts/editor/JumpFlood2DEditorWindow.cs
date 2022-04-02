@@ -5,6 +5,8 @@ using System.Linq;
 using JFA.editor;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
+using UnityEngine.UI;
 
 namespace JFA.scripts.editor
 {
@@ -24,6 +26,7 @@ namespace JFA.scripts.editor
         private bool displayUDF;
 
         private JFA2DSeedController seedController;
+        private GraphicsFormat format;
 
         private enum SourceOptions
         {
@@ -165,9 +168,9 @@ namespace JFA.scripts.editor
         protected override void InitJFAConfig()
         {
             DrawAndSetMaxPasses();
-
+            DrawAndSetSupportedFormats();
             _config = new JFAConfig
-                {ForceMaxPasses = forceMaxPasses, MaxPasses = maxPasses, RecordProcess = shouldSaveProcess};
+                {ForceMaxPasses = forceMaxPasses, MaxPasses = maxPasses, RecordProcess = shouldSaveProcess, Format = format};
         }
 
         SourceOptions sourceProperties = SourceOptions.SourceTexture;
@@ -213,10 +216,35 @@ namespace JFA.scripts.editor
             }
         }
 
+        private void DrawAndSetSupportedFormats()
+        {
+            if (seedController.IsTextureReady() == false)
+            {
+                return;
+            }
+
+            var graphicFormats = Enum.GetValues(typeof(GraphicsFormat));
+            List<string> supportedValues = new List<string>();
+            foreach (GraphicsFormat format in graphicFormats)
+            {
+                if (SystemInfo.IsFormatSupported(format, FormatUsage.Render))
+                {
+                    supportedValues.Add(format.ToString());
+                }
+            }
+
+            int index = supportedValues.IndexOf(format.ToString());
+            index = index > -1 ? index : Math.Max(0, supportedValues.IndexOf(seedController.Seed.graphicsFormat.ToString()));
+            var selected = EditorGUILayout.Popup(index, supportedValues.ToArray());
+            format = (GraphicsFormat) Enum.Parse(typeof(GraphicsFormat), supportedValues[selected]);
+        }
+
+
         private Texture2D LoadTexture(int number)
         {
             var path = Directory.GetFiles(JFAConfig.SavePath, "*.png", SearchOption.AllDirectories).OrderBy(x => x)
                 .ToList()[number];
+
             path = Path.Combine(JFAConfig.SavePath, path);
 
             Texture2D tex;
@@ -232,7 +260,6 @@ namespace JFA.scripts.editor
                 tex = new Texture2D(1, 1);
                 tex.LoadImage(bytes);
                 tex.filterMode = FilterMode.Point;
-
                 loadedTextures.Add(path, tex);
                 return tex;
             }

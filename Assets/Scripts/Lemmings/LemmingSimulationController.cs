@@ -6,15 +6,24 @@ namespace Lemmings
     public class LemmingSimulationController : MonoBehaviour
     {
         public Canvas Canvas;
-        public Texture2D collisionBitmap;
         public LemmingSimulationModel SimulationModel;
         public LemmingRenderingModel RenderingModel;
+        public SceneModel SceneModel;
+
+        private TerrainSimulationController terrainController;
 
         private void Start()
         {
             SetCanvas();
+            PrepareterrainController();
             PrepareComputeShader();
             RenderingModel.Init(SimulationModel);
+        }
+
+        private void PrepareterrainController()
+        {
+            terrainController = new TerrainSimulationController();
+            terrainController.Init(SceneModel);
         }
 
         private void SetCanvas()
@@ -44,7 +53,7 @@ namespace Lemmings
             SimulationModel.SimulationShader.SetVector("_MinBound", SimulationModel.Bounds.BotLeft());
             SimulationModel.SimulationShader.SetFloat("_DeltaTime", Time.deltaTime);
             SimulationModel.SimulationShader.SetFloat("_Time", Time.time);
-            SimulationModel.SimulationShader.SetTexture(SimulationModel.ComputeKernel, "_collisionBitMap", collisionBitmap);
+            SimulationModel.SimulationShader.SetTexture(SimulationModel.ComputeKernel, "_collisionBitMap", SceneModel.TerrainBitmap);
         }
 
         private void Simulate()

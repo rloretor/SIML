@@ -1,5 +1,8 @@
 ﻿using System;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
+using UnityEngine.UI;
 
 [Serializable]
 public class JFAConfig : UnityEngine.Object
@@ -9,6 +12,7 @@ public class JFAConfig : UnityEngine.Object
     [SerializeField] private int maxPasses;
     [SerializeField] private bool forceMaxPasses;
     [SerializeField] private bool recordProcess;
+    [SerializeField] private GraphicsFormat format;
 
     public int MaxPasses
     {
@@ -26,5 +30,39 @@ public class JFAConfig : UnityEngine.Object
     {
         get => recordProcess;
         set => recordProcess = value;
+    }
+
+    public GraphicsFormat Format
+    {
+        get => format;
+        set => format = value;
+    }
+}
+
+[CustomEditor(typeof(JFAConfig))]
+public class JFAConfigEditor : Editor
+{
+    SerializedProperty SupportedGraphicsFormats;
+
+    void OnEnable()
+    {
+        SupportedGraphicsFormats = serializedObject.FindProperty("looformatkAtPoint");
+    }
+
+    public override void OnInspectorGUI()
+    {
+        DrawDefaultInspector();
+        serializedObject.Update();
+        EditorGUILayout.PropertyField(SupportedGraphicsFormats);
+        if (SystemInfo.IsFormatSupported((GraphicsFormat) SupportedGraphicsFormats.enumValueIndex, FormatUsage.Render))
+        {
+            EditorGUILayout.LabelField("(Supported!)");
+        }
+        else
+        {
+            EditorGUILayout.LabelField("(Not supported :( )");
+        }
+
+        serializedObject.ApplyModifiedProperties();
     }
 }

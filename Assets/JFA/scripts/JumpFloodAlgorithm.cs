@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 
 [Serializable]
 public class JumpFloodAlgorithmBase<T> where T : Texture
@@ -12,12 +13,11 @@ public class JumpFloodAlgorithmBase<T> where T : Texture
     protected Shader JFA;
     protected T seedTexture;
 
-    protected int passes;
     protected JFAConfig config;
     protected bool recordProcess => config.RecordProcess;
     protected bool forceMaxPasses => config.ForceMaxPasses;
     protected int maxPasses => config.MaxPasses;
-
+    protected GraphicsFormat format => config.Format;
 
     public JumpFloodAlgorithmBase(T seedTexture, JFAConfig configParameters)
     {
@@ -26,27 +26,35 @@ public class JumpFloodAlgorithmBase<T> where T : Texture
         InitMaterial();
     }
 
-    public virtual void Compute()
+    public virtual RenderTexture Compute()
     {
-        ComputePasses();
+        var result = ExecutePasses(ComputePasses(config.ForceMaxPasses, config.MaxPasses));
+        return result;
+    }
 
-        var Height = seedTexture.height;
-        var Width = seedTexture.width;
-        var source = RenderTexture.GetTemporary(Width, Height, 0);
-        var dest = RenderTexture.GetTemporary(Width, Height, 0);
+    private RenderTexture ExecutePasses(int passes)
+    {
+        var height = seedTexture.height;
+        var width = seedTexture.width;
+        GraphicsFormat format = this.format;
+        var source = RenderTexture.GetTemporary(width, height, 0, format);
+        var dest = RenderTexture.GetTemporary(width, height, 0, format);
         Shader.SetGlobalInt(maxPassID, passes);
 
         Graphics.Blit(seedTexture, source);
-        for (int passNumber = 0; passNumber <= passes; passNumber++)
+        for (int passNumber = 0; passNumber < passes; passNumber++)
         {
             Pass(passNumber, source, dest);
             (source, dest) = (dest, source);
             Debug.Log("swap " + passNumber);
         }
 
+        RenderTexture result = new RenderTexture(width, height, 0, format);
+        Pass(passes, source, result);
         RenderTexture.active = null;
         source.Release();
         dest.Release();
+        return result;
     }
 
     protected virtual void Pass(int pass, RenderTexture sourceId, RenderTexture destId)
@@ -65,22 +73,12 @@ public class JumpFloodAlgorithmBase<T> where T : Texture
         };
     }
 
-    private void ComputePasses()
+    private int ComputePasses(bool forceMaxPasses, int maxPasses)
     {
         var Height = seedTexture.height;
         var Width = seedTexture.width;
-        passes = Mathf.CeilToInt(Mathf.Log(Mathf.Max(Width, Height), 2f));
+        int passes = Mathf.CeilToInt(Mathf.Log(Mathf.Max(Width, Height), 2f));
 
-        if (forceMaxPasses)
-        {
-            passes = maxPasses;
-        }
-        else
-        {
-            if (passes > maxPasses)
-            {
-                Debug.LogWarning($"The algorithm needs to run with {passes}, not using {maxPasses}");
-            }
-        }
+        return forceMaxPasses ? maxPasses : passes;
     }
 }

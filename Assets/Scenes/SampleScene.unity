@@ -494,15 +494,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Canvas: {fileID: 1348752546}
-  collisionBitmap: {fileID: 2800000, guid: 5301e80ae2f194b1b8e25637692fb697, type: 3}
   SimulationModel:
     SimulationShader: {fileID: 7200000, guid: 47cc7675f257f4061864b9f1da33e7f5, type: 3}
     Bounds: {fileID: 1348752547}
-    LemmingInstances: 1048576
+    LemmingInstances: 512
   RenderingModel:
     LemmingMesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
     LemmingInstancedShader: {fileID: 4800000, guid: 3147f2f01ac84f9e854a982a919feb9b,
       type: 3}
+  SceneModel:
+    terrainBitmap: {fileID: 2800000, guid: 714e1190b0ea94eaca6489e67853e85a, type: 3}
 --- !u!1 &1929876869
 GameObject:
   m_ObjectHideFlags: 0

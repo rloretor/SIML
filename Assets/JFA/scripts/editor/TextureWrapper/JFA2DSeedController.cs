@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 
 namespace JFA.editor
 {
@@ -11,9 +12,9 @@ namespace JFA.editor
 
         public abstract void DrawProperties();
 
-        public virtual void PaintSeeds()
+        public virtual void PaintSeeds(GraphicsFormat format = GraphicsFormat.R8G8B8A8_UNorm)
         {
-            seed = new Texture2D(width, height, TextureFormat.RGB24, false)
+            seed = new Texture2D(width, height, format, 0, TextureCreationFlags.None)
             {
                 name = "Seed",
                 hideFlags = HideFlags.HideAndDontSave,

@@ -11,7 +11,7 @@ namespace Lemmings
         public ComputeShader SimulationShader;
         public int ThreadGroupSize { get; private set; }
         public RectTransform Bounds;
-        
+
         public int LemmingInstances;
 
         private const int GroupSize = 512;

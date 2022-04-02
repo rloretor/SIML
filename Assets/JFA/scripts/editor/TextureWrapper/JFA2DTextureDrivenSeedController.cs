@@ -1,13 +1,14 @@
 ﻿using System;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 
 namespace JFA.editor
 {
     [Serializable]
     public class JFA2DTextureDrivenSeedController : JFA2DSeedController
     {
-        Texture2D sourceTexture;
+        private Texture2D sourceTexture;
 
         public override void DrawProperties()
         {
@@ -32,11 +33,13 @@ namespace JFA.editor
                 width = sourceTexture.width;
                 height = sourceTexture.height;
             }
+
+            PaintSeeds();
         }
 
-        public override void PaintSeeds()
+        public override void PaintSeeds(GraphicsFormat format = GraphicsFormat.R8G8B8A8_UNorm)
         {
-            base.PaintSeeds();
+            base.PaintSeeds(format);
 
             Color[] pixelBuffer = sourceTexture.GetPixels();
             for (int i = 0; i < pixelBuffer.Length; i++)
