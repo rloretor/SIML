@@ -1,3 +1,4 @@
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -8,22 +9,24 @@ namespace Lemmings
         public Canvas Canvas;
         public LemmingSimulationModel SimulationModel;
         public LemmingRenderingModel RenderingModel;
-        public SceneModel SceneModel;
+
+        [Header("Scene")] public SceneModel SceneModel;
+        public TerrainSimulationView TerrainSimulationView;
 
         private TerrainSimulationController terrainController;
 
         private void Start()
         {
             SetCanvas();
-            PrepareterrainController();
+            PrepareTerrainController();
             PrepareComputeShader();
             RenderingModel.Init(SimulationModel);
         }
 
-        private void PrepareterrainController()
+        private void PrepareTerrainController()
         {
             terrainController = new TerrainSimulationController();
-            terrainController.Init(SceneModel);
+            terrainController.Init(SceneModel, TerrainSimulationView);
         }
 
         private void SetCanvas()
@@ -35,6 +38,7 @@ namespace Lemmings
 
         private void Update()
         {
+            terrainController.UpdateTerrain();
             UpdateComputeShader();
             Simulate();
             Draw();
@@ -53,7 +57,7 @@ namespace Lemmings
             SimulationModel.SimulationShader.SetVector("_MinBound", SimulationModel.Bounds.BotLeft());
             SimulationModel.SimulationShader.SetFloat("_DeltaTime", Time.deltaTime);
             SimulationModel.SimulationShader.SetFloat("_Time", Time.time);
-            SimulationModel.SimulationShader.SetTexture(SimulationModel.ComputeKernel, "_collisionBitMap", SceneModel.TerrainBitmap);
+            SimulationModel.SimulationShader.SetTexture(SimulationModel.ComputeKernel, "_collisionBitMap", terrainController.TerrainBitRT);
         }
 
         private void Simulate()

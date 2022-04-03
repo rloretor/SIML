@@ -42,7 +42,7 @@ void LemmingsMovementPassKernel(uint3 id : SV_DispatchThreadID)
 
 
     float2 uv = computeUV(projectedPosition);
-    const bool isProjectedCollision = round(_collisionBitMap.SampleLevel(_linearClampSampler, uv, 0).a);
+    const bool isProjectedCollision = round(_collisionBitMap.SampleLevel(_linearClampSampler, uv, 0).r);
 
     lemming.Position = isProjectedCollision
                            ? lemming.Position + float2(0, 100) * _DeltaTime

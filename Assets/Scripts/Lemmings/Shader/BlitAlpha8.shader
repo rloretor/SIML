@@ -1,4 +1,4 @@
-﻿Shader "BlitUInt8"
+﻿Shader "BlitAlpha8"
 {
     Properties
     {
@@ -6,11 +6,6 @@
     }
     SubShader
     {
-        Tags
-        {
-            "RenderType"="Opaque"
-        }
-        LOD 100
 
         Pass
         {
@@ -31,9 +26,7 @@
                 float2 uv : TEXCOORD0;
                 float4 vertex : SV_POSITION;
             };
-
-            int _pass;
-            int _maxPasses;
+            
             sampler2D _MainTex;
             float4 _MainTex_ST;
             float4 _MainTex_TexelSize;
@@ -46,7 +39,7 @@
                 return o;
             }
 
-            uint frag(v2f i) : SV_Target
+            float frag(v2f i) : SV_Target
             {
                 return tex2Dlod(_MainTex, float4(i.uv, 0, 0)).a;
             }
