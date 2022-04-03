@@ -32,9 +32,8 @@ namespace JFA.editor
 
                 width = sourceTexture.width;
                 height = sourceTexture.height;
+                PaintSeeds();
             }
-
-            PaintSeeds();
         }
 
         public override void PaintSeeds(GraphicsFormat format = GraphicsFormat.R8G8B8A8_UNorm)
@@ -54,7 +53,7 @@ namespace JFA.editor
                 float row = (float) i / sourceTexture.width;
                 float column = (float) i % sourceTexture.width;
                 pixelBuffer[i] = new Color((column) / sourceTexture.width, (row) / sourceTexture.height,
-                    (float) i / pixelBuffer.Length, 0);
+                    ((column) / sourceTexture.width) + ((row) / sourceTexture.height), 0);
             }
 
             seed.SetPixels(pixelBuffer);

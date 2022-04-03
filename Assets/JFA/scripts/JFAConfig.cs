@@ -5,7 +5,7 @@ using UnityEngine.Experimental.Rendering;
 using UnityEngine.UI;
 
 [Serializable]
-public class JFAConfig : UnityEngine.Object
+public class JFAConfig
 {
     public static string SaveFileName = "Result_{0:00}";
     public static string SavePath => $"{Application.dataPath}/JFA/Results";

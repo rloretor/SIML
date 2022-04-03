@@ -36,13 +36,17 @@
             float4 _MainTex_ST;
             float4 _MainTex_TexelSize;
 
+            sampler2D _BitMap;
+
             uniform bool showDistance;
             uniform bool filterDistance;
             uniform bool boxFilterDistance;
             uniform bool flow;
+            uniform bool pack;
+            uniform int negative;
 
             #define cell(uv) tex2D(_MainTex, uv).xyz
-            #define D(uv) distance(cell(uv),uv)
+            #define D(uv) negative * distance(cell(uv),uv)
 
             v2f vert(appdata v)
             {
@@ -95,6 +99,14 @@
 
             float4 frag(v2f i) : SV_Target
             {
+                if (pack)
+                {
+                    if (tex2D(_BitMap, i.uv).r)
+                    {
+                        discard;
+                    }
+                    return float4(Central_Diff(i.uv),D(i.uv), 1);
+                }
                 if (showDistance)
                 {
                     return D(i.uv);
@@ -111,7 +123,7 @@
                 {
                     return float4(Central_Diff(i.uv), 0, 1);
                 }
-                return float4(hash31((cell(i.uv).z) * 1013), 1);
+                return float4(cell(i.uv).xyz, 1); //float4(hash31((cell(i.uv).z) * 1013), 1);
             }
             ENDCG
         }

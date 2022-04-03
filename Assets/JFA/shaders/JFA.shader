@@ -70,7 +70,7 @@
                         }
                     }
                 }
-                return float4(bestpos, bestId, 0);
+                return float4(bestpos, bestId, 1);
             }
             ENDCG
         }

@@ -15,9 +15,7 @@ public class JumpFloodAlgorithmBase<T> where T : Texture
 
     protected JFAConfig config;
     protected bool recordProcess => config.RecordProcess;
-    protected bool forceMaxPasses => config.ForceMaxPasses;
-    protected int maxPasses => config.MaxPasses;
-    protected GraphicsFormat format => config.Format;
+    protected GraphicsFormat Format => config.Format;
 
     public JumpFloodAlgorithmBase(T seedTexture, JFAConfig configParameters)
     {
@@ -28,15 +26,16 @@ public class JumpFloodAlgorithmBase<T> where T : Texture
 
     public virtual RenderTexture Compute()
     {
-        var result = ExecutePasses(ComputePasses(config.ForceMaxPasses, config.MaxPasses));
+        var result = ExecutePasses(ComputePasses(config));
         return result;
     }
+
 
     private RenderTexture ExecutePasses(int passes)
     {
         var height = seedTexture.height;
         var width = seedTexture.width;
-        GraphicsFormat format = this.format;
+        GraphicsFormat format = Format;
         var source = RenderTexture.GetTemporary(width, height, 0, format);
         var dest = RenderTexture.GetTemporary(width, height, 0, format);
         Shader.SetGlobalInt(maxPassID, passes);
@@ -68,17 +67,17 @@ public class JumpFloodAlgorithmBase<T> where T : Texture
         JFA = Shader.Find("JFA");
         JFAMat = new Material(JFA)
         {
-            name = "JFAMat",
+            name = "JFAMAT",
             hideFlags = HideFlags.HideAndDontSave
         };
     }
 
-    private int ComputePasses(bool forceMaxPasses, int maxPasses)
+    private int ComputePasses(JFAConfig config)
     {
         var Height = seedTexture.height;
         var Width = seedTexture.width;
         int passes = Mathf.CeilToInt(Mathf.Log(Mathf.Max(Width, Height), 2f));
 
-        return forceMaxPasses ? maxPasses : passes;
+        return config.ForceMaxPasses ? config.MaxPasses : passes;
     }
 }

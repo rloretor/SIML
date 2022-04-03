@@ -1,4 +1,4 @@
-﻿Shader "BlitAlpha8"
+﻿Shader "BlitSeeds"
 {
     Properties
     {
@@ -6,7 +6,6 @@
     }
     SubShader
     {
-
         Pass
         {
             CGPROGRAM
@@ -30,7 +29,7 @@
             sampler2D _MainTex;
             float4 _MainTex_ST;
             float4 _MainTex_TexelSize;
-            bool isReversedBitmap;
+            
 
             v2f vert(appdata v)
             {
@@ -40,9 +39,11 @@
                 return o;
             }
 
-            float frag(v2f i) : SV_Target
+            float4 frag(v2f i) : SV_Target
             {
-                return ((bool)tex2Dlod(_MainTex, float4(i.uv, 0, 0)).a) == isReversedBitmap;
+                bool isSeed = tex2Dlod(_MainTex, float4(i.uv, 0, 0)).r;
+                if (isSeed == false) discard;
+                return float4(i.uv, i.uv.y + i.uv.x, 1);
             }
             ENDCG
         }
