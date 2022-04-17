@@ -43,10 +43,13 @@
             uniform bool boxFilterDistance;
             uniform bool flow;
             uniform bool pack;
+            int bitOnValue;
+
             uniform int negative;
 
+
             #define cell(uv) tex2D(_MainTex, uv).xyz
-            #define D(uv) negative * distance(cell(uv),uv)
+            #define D(uv) sign(negative) * length(cell(uv)-uv)
 
             v2f vert(appdata v)
             {
@@ -87,26 +90,8 @@
             }
 
 
-            float2 Central_Diff(float2 uv)
-            {
-                float2 d = float2(1, 0);
-                float2 right = uv + d.xy * _MainTex_TexelSize;
-                float2 left = uv - d.xy * _MainTex_TexelSize;
-                float2 top = uv + d.yx * _MainTex_TexelSize;
-                float2 bot = uv - d.yx * _MainTex_TexelSize;
-                return normalize(float2(D(right) - D(left),D(top) - D(bot)));
-            }
-
             float4 frag(v2f i) : SV_Target
             {
-                if (pack)
-                {
-                    if (tex2D(_BitMap, i.uv).r)
-                    {
-                        discard;
-                    }
-                    return float4(Central_Diff(i.uv),D(i.uv), 1);
-                }
                 if (showDistance)
                 {
                     return D(i.uv);
@@ -119,10 +104,7 @@
                 {
                     return BoxFilter(i.uv);
                 }
-                if (flow)
-                {
-                    return float4(Central_Diff(i.uv), 0, 1);
-                }
+
                 return float4(cell(i.uv).xyz, 1); //float4(hash31((cell(i.uv).z) * 1013), 1);
             }
             ENDCG

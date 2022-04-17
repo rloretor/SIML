@@ -30,7 +30,7 @@
             sampler2D _MainTex;
             float4 _MainTex_ST;
             float4 _MainTex_TexelSize;
-            bool isReversedBitmap;
+            int bitOnValue;
 
             v2f vert(appdata v)
             {
@@ -42,7 +42,7 @@
 
             float frag(v2f i) : SV_Target
             {
-                return ((bool)tex2Dlod(_MainTex, float4(i.uv, 0, 0)).a) == isReversedBitmap;
+                return ((int)tex2D(_MainTex, i.uv).a) == bitOnValue;
             }
             ENDCG
         }

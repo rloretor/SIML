@@ -23,11 +23,19 @@ Shader "Instanced/LemmingInstanced"
             {
                 float2 Position;
                 float2 Velocity;
+                float2 Acceleration;
             };
 
             StructuredBuffer<Lemming> _LemmingsBuffer;
 
             uint _Instances;
+            sampler2D _collisionBitMap;
+            float4 _collisionBitMap_ST;
+            float4 _collisionBitMap_TexelSize;
+
+            float2 _minBounds;
+            float2 _maxBounds;
+            #define _size (_maxBounds-_minBounds)
 
             struct appdata
             {
@@ -41,6 +49,7 @@ Shader "Instanced/LemmingInstanced"
                 float4 vertex : SV_POSITION;
                 float4 color :COLOR0;
                 float2 uv : TEXCOORD0;
+                float3 v: TEXCOORD1;
             };
 
             struct f2r
@@ -50,50 +59,37 @@ Shader "Instanced/LemmingInstanced"
                 float depth : SV_Depth;
             };
 
-            float4x4 lookAtMatrix(float3 forward, float3 up)
-            {
-                float3 z = normalize(forward);
-                float3 x = normalize(cross(z, up));
-                float3 y = normalize(cross(z, x));
-
-                return float4x4(
-                    x.x, y.x, z.x, 0,
-                    x.y, y.y, z.y, 0,
-                    x.z, y.z, z.z, 0,
-                    0, 0, 0, 1
-                );
-            }
 
             #define Rot(a)  float2x2(cos(a), sin(a),-sin(a), cos(a))
+
+            float2 computeUV(float2 position)
+            {
+                return (position - _minBounds) / _size;
+            }
 
             v2f vert(appdata v, uint instanceID : SV_InstanceID)
             {
                 v2f o;
                 const Lemming lemming = _LemmingsBuffer[instanceID];
-
-                const float3 localSpaceCameraPos = mul(unity_WorldToObject, float4(_WorldSpaceCameraPos.xyz, 1));
-                //  float3 camVect = normalize(float3(lemming.Position.xy, 1) - localSpaceCameraPos);
-                //const float4x4 rot = lookAtMatrix(v.vertex - localSpaceCameraPos, float3(0, 1, 0));
-                //  v.vertex.xz = mul(Rot(acos(_Time.y)), v.vertex.xz);
+                const float S = length(lemming.Velocity);
+                const float2 V = lemming.Velocity;
                 v.vertex.y += 0.5;
-                v.vertex.x *= (5);
-                v.vertex.y *= (10);
-                // v.vertex = mul(rot, v.vertex);
+                //v.vertex.x *= (1 - v.vertex.y);
+                //v.vertex.y *= max(10, S);
+                v.vertex.xyz *= 5;
+                //  v.vertex.xy = mul(Rot(atan2(V.x,V.y)), v.vertex.xy);
                 v.vertex.xyz += float3(lemming.Position, 0);
 
-                //o.wPos = v.vertex;
-                //o.sphereWPos = boid.position;
-                //o.rayD = (o.wPos - _WorldSpaceCameraPos.xyz);
-                // o.color = float4(boid.velocity, boid.dummy);
+                o.uv = computeUV(v.vertex);
                 o.vertex = mul(UNITY_MATRIX_VP, v.vertex);
-                o.uv = v.uv;
+                o.v = float3(lemming.Acceleration, instanceID / 1.0 * _Instances);
                 return o;
             }
 
 
             float4 frag(v2f i):SV_Target
             {
-                return float4(1, 1, 1, 1);
+                return i.v.x; //tex2D(_collisionBitMap, i.uv);
             }
             ENDCG
         }

@@ -24,7 +24,7 @@ namespace JFA.scripts.editor
             DrawJFAButton();
             DrawInteractiveArea();
         }
-        
+
         protected abstract void DrawProperties();
         protected abstract void InitJFAConfig();
         protected abstract void DrawJFAButton();

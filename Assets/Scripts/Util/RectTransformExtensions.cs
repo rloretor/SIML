@@ -38,6 +38,16 @@ namespace Lemmings
             };
         }
 
+        public static Vector2 UV(this RectTransform rect, Vector2 uv)
+        {
+            Vector2 size = rect.TopRight() - rect.BotLeft();
+            Vector2 position = rect.BotLeft();
+
+            position.x += uv.x * size.x;
+            position.y += uv.y * size.y;
+            return position;
+        }
+
         public static Vector2 Center(this RectTransform rect)
         {
             Vector3[] worldCorners = new Vector3[4];

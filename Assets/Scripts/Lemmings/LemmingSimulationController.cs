@@ -10,23 +10,28 @@ namespace Lemmings
         public LemmingSimulationModel SimulationModel;
         public LemmingRenderingModel RenderingModel;
 
-        [Header("Scene")] public SceneModel SceneModel;
+        [Header("Scene")] public BitMapSceneModel SceneModel;
         public TerrainSimulationView TerrainSimulationView;
 
         private TerrainSimulationController terrainController;
+        private TerrainVectorDebugController terrainDebugController;
 
         private void Start()
         {
             SetCanvas();
             PrepareTerrainController();
             PrepareComputeShader();
-            RenderingModel.Init(SimulationModel);
         }
 
         private void PrepareTerrainController()
         {
             terrainController = new TerrainSimulationController();
+            terrainDebugController = new TerrainVectorDebugController();
+            SceneModel sceneModel = new SDFSceneModel();
+            sceneModel.Init(SceneModel.SceneBitMap.width, SceneModel.SceneBitMap.height);
+
             terrainController.Init(SceneModel, TerrainSimulationView);
+            terrainDebugController.Init(terrainController, RenderingModel.LemmingMesh, SimulationModel.Bounds);
         }
 
         private void SetCanvas()
@@ -38,10 +43,13 @@ namespace Lemmings
 
         private void Update()
         {
+            RenderingModel.Init(SimulationModel, terrainController, SceneModel);
+
             terrainController.UpdateTerrain();
             UpdateComputeShader();
             Simulate();
             Draw();
+            terrainDebugController.DrawDebug();
         }
 
         private void PrepareComputeShader()
@@ -55,9 +63,11 @@ namespace Lemmings
         {
             SimulationModel.SimulationShader.SetVector("_MaxBound", SimulationModel.Bounds.TopRight());
             SimulationModel.SimulationShader.SetVector("_MinBound", SimulationModel.Bounds.BotLeft());
+            SimulationModel.SimulationShader.SetVector("_texDimensions", new Vector2(terrainController.TerrainAnalysis.width, terrainController.TerrainAnalysis.height));
             SimulationModel.SimulationShader.SetFloat("_DeltaTime", Time.deltaTime);
             SimulationModel.SimulationShader.SetFloat("_Time", Time.time);
             SimulationModel.SimulationShader.SetTexture(SimulationModel.ComputeKernel, "_collisionBitMap", terrainController.TerrainBitRT);
+            SimulationModel.SimulationShader.SetTexture(SimulationModel.ComputeKernel, "_terrainAnalysisTexture", terrainController.TerrainAnalysis);
         }
 
         private void Simulate()
