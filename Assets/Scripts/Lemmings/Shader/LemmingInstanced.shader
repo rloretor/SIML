@@ -72,12 +72,12 @@ Shader "Instanced/LemmingInstanced"
                 v2f o;
                 const Lemming lemming = _LemmingsBuffer[instanceID];
                 const float S = length(lemming.Velocity);
-                const float2 V = lemming.Velocity;
+                const float2 V = normalize(lemming.Velocity);
                 v.vertex.y += 0.5;
-                //v.vertex.x *= (1 - v.vertex.y);
-                //v.vertex.y *= max(10, S);
-                v.vertex.xyz *= 5;
-                //  v.vertex.xy = mul(Rot(atan2(V.x,V.y)), v.vertex.xy);
+                v.vertex.x *= (1 - v.vertex.y);
+                v.vertex.y *= S * unity_DeltaTime.x;
+                //v.vertex.xyz *= 10;
+                v.vertex.xy = mul(Rot(atan2(V.x,V.y)), v.vertex.xy);
                 v.vertex.xyz += float3(lemming.Position, 0);
 
                 o.uv = computeUV(v.vertex);
@@ -89,7 +89,7 @@ Shader "Instanced/LemmingInstanced"
 
             float4 frag(v2f i):SV_Target
             {
-                return i.v.x; //tex2D(_collisionBitMap, i.uv);
+                return 1; //tex2D(_collisionBitMap, i.uv);
             }
             ENDCG
         }

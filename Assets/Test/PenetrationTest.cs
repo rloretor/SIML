@@ -43,7 +43,7 @@ public class PenetrationTest : MonoBehaviour
     private void DrawIntersection()
     {
         Vector2 p0 = fixedPos.position;
-        Vector2 d0 = ((Vector2) penPos.position - p0).normalized;
+        Vector2 d0 = ((Vector2) penPos.position - p0);
         Vector2 p1 = pixelPos.position;
         Vector2 s = ((Vector2) vel.position - p1) / 2.0f;
         s.x = Mathf.Abs(s.x);
@@ -63,15 +63,18 @@ public class PenetrationTest : MonoBehaviour
 
         float tmin = Mathf.Max(Mathf.Min(X[0], X[1]), Mathf.Min(Y[0], Y[1]));
         float tmax = Mathf.Min(Mathf.Max(X[0], X[1]), Mathf.Max(Y[0], Y[1]));
-
-        if (tmax < 0 || tmin > tmax)
+        float t = tmin < 0f ? tmax : tmin;
+        if (tmax < 0 || tmin > tmax || t > 1)
         {
             Gizmos.color = Color.black;
         }
         else
         {
-            Vector2 p = d0 * (tmin < 0f ? tmax : tmin) + p0;
-            Gizmos.DrawWireSphere(p, 20.0f);
+            Debug.Log("[" + tmin + " - " + tmax + "] " + d0.magnitude);
+
+            Vector2 p = d0 * t + p0;
+            Gizmos.DrawWireSphere(d0 * tmin + p0, 20.0f);
+            Gizmos.DrawWireSphere(d0 * tmax + p0, 20.0f);
             Vector2 n = (p - p1);
             Vector2 a = new Vector2(Mathf.Abs(n.x), Mathf.Abs(n.y));
             if (a.x > a.y)
@@ -83,7 +86,7 @@ public class PenetrationTest : MonoBehaviour
                 n = Vector2.up * Mathf.Sign(n.y);
             }
 
-            Gizmos.DrawLine(p, p + n * 1000);
+            Gizmos.DrawLine(p, p + n);
         }
     }
 

@@ -16,6 +16,8 @@ namespace Lemmings
         private TerrainSimulationController terrainController;
         private TerrainVectorDebugController terrainDebugController;
 
+        private bool simulate = false;
+
         private void Start()
         {
             SetCanvas();
@@ -44,12 +46,17 @@ namespace Lemmings
         private void Update()
         {
             RenderingModel.Init(SimulationModel, terrainController, SceneModel);
+            if (Input.GetKey(KeyCode.Space))
+            {
+                simulate = true;
+            }
 
             terrainController.UpdateTerrain();
             UpdateComputeShader();
             Simulate();
             Draw();
             terrainDebugController.DrawDebug();
+            simulate = false;
         }
 
         private void PrepareComputeShader()
@@ -66,6 +73,7 @@ namespace Lemmings
             SimulationModel.SimulationShader.SetVector("_texDimensions", new Vector2(terrainController.TerrainAnalysis.width, terrainController.TerrainAnalysis.height));
             SimulationModel.SimulationShader.SetFloat("_DeltaTime", Time.deltaTime);
             SimulationModel.SimulationShader.SetFloat("_Time", Time.time);
+            SimulationModel.SimulationShader.SetBool("_Simulate", this.simulate);
             SimulationModel.SimulationShader.SetTexture(SimulationModel.ComputeKernel, "_collisionBitMap", terrainController.TerrainBitRT);
             SimulationModel.SimulationShader.SetTexture(SimulationModel.ComputeKernel, "_terrainAnalysisTexture", terrainController.TerrainAnalysis);
         }

@@ -18,7 +18,7 @@ Texture2D _collisionBitMap;
 SamplerState _linearClampSampler;
 
 Texture2D _terrainAnalysisTexture;
-
+bool _Simulate;
 
 cbuffer once {float2 _texDimensions;float2 _MaxBound; float2 _MinBound; float _DeltaTime; float _Time;};
 
@@ -70,7 +70,7 @@ float Ray2Ray(float2 a, float2 ad, float2 b, float2 bd)
 
 bool Ray2Rect(rect r, float2 p0, float2 D, out float t, out float2 n)
 {
-    #define _d float2(1,0)
+    #define _d  float2(1, 0)
     float2 X, Y;
     // find closest X axis and Y axis intersection points
     X[0] = Ray2Ray(p0, D, r.Position - r.Size, _d.xy);
@@ -80,57 +80,57 @@ bool Ray2Rect(rect r, float2 p0, float2 D, out float t, out float2 n)
 
     n[0] = max(min(X[0], X[1]), min(Y[0], Y[1])); // reusing existing register normal = tmin 
     n[1] = min(max(X[0], X[1]), max(Y[0], Y[1])); // replace r.position by tmin and r.size by tmax
-    if (n[1] < 0 || n[0] > n[1])
-    {
-        t = 0;
-        n = 0;
-        return false;
-    }
-    t = n[0] < 0.0 ? n[1] : n[0];
-    n = r.Position - (p0 + D * t);
-    r.Position = abs(n); //reusing variable to get the absolute variables
-    if (r.Position.x > r.Position.y)
-    {
-        n = float2(sign(n.x), 0);
-    }
-    else
-    {
-        n = float2(0, sign(n.y));
-    }
-    //n = normalize(n);
-    return true;
+    t = min(n[1], n[0]);
+    return !(n[1] < 0 || n[0] > n[1] || t > 1);
 }
 
 void FixCollision(inout Lemming lemming, float2 uv)
 {
     rect pixel;
     pixel.Position = computePos(computePixelUV(uv, 0.5));
-    pixel.Size = abs((computePos(computePixelUV(uv, 0)) - pixel.Position) * 10);
+    pixel.Size = abs((computePos(computePixelUV(uv, 0)) - pixel.Position)) + 4;
     float t = 0;
     float2 n = 0;
-    bool c = Ray2Rect(pixel, lemming.Position, lemming.Velocity, t, n);
-    lemming.Position = lemming.Position + lemming.Velocity * (c ? 0.01 : t * 1.01);
-    lemming.Velocity = 0;
-    lemming.Acceleration = c;
-    // n * abs(lemming.Velocity) * (1 - _DeltaTime);
+    bool c = Ray2Rect(pixel, lemming.Position, lemming.Velocity * _DeltaTime, t, n);
+    if (c)
+    {
+        lemming.Position = lemming.Position + lemming.Velocity * _DeltaTime * t;
+        float3 sdf = _terrainAnalysisTexture.SampleLevel(_linearClampSampler,
+                                                         computePixelUV(computeUV(lemming.Position), float2(0, 1)),
+                                                         0);
+        n = normalize(sdf.yx);
+        if (dot(normalize(lemming.Velocity), n) > 0)
+        {
+            n = -n;
+        }
+        lemming.Acceleration += float2(0, 1);
+        lemming.Velocity = project(lemming.Velocity * (1 - abs(t)), n);
+        lemming.Velocity.y *= 0.1;
+        // lemming.Velocity = normalize(lemming.Velocity) * clamp(length(lemming.Velocity), 0.1, 10);
+        lemming.Velocity += lemming.Acceleration;
+    }
 }
+
 
 [numthreads(512,1,1)]
 void LemmingsMovementPassKernel(uint3 id : SV_DispatchThreadID)
 {
-    Lemming lemming = _Lemmings[id.x];
-    lemming.Acceleration = -float2(0, Gravity);
-    lemming.Velocity += lemming.Acceleration * _DeltaTime;
-    lemming.Position += lemming.Velocity * _DeltaTime;
-
-    float2 projUV = computePixelUV(computeUV(lemming.Position), 0.5);
-
-    if (_collisionBitMap.SampleLevel(_linearClampSampler, projUV, 0).x == 0)
+    if (_Simulate)
     {
-        Lemming lemming1 = _Lemmings[id.x];
-        FixCollision(lemming1, projUV);
-        lemming = lemming1;
+        Lemming lemming = _Lemmings[id.x];
+        float2 p = lemming.Position + lemming.Velocity * _DeltaTime;
+        float2 uv = computeUV(p);
+        if (_collisionBitMap.SampleLevel(_linearClampSampler, uv, 0).x == 0)
+        {
+            FixCollision(lemming, uv);
+        }
+        else
+        {
+            lemming.Acceleration = -float2(0, Gravity);
+            lemming.Velocity += lemming.Acceleration * _DeltaTime;
+            lemming.Position += lemming.Velocity * _DeltaTime;
+        }
+        FixOutOfBounds(lemming, uv);
+        _Lemmings[id.x] = lemming;
     }
-    FixOutOfBounds(lemming, projUV);
-    _Lemmings[id.x] = lemming;
 }
