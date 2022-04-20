@@ -98,15 +98,15 @@ void FixCollision(inout Lemming lemming, float2 uv)
         float3 sdf = _terrainAnalysisTexture.SampleLevel(_linearClampSampler,
                                                          computePixelUV(computeUV(lemming.Position), float2(0, 1)),
                                                          0);
-        n = normalize(sdf.yx);
+        n = n.yx;
         if (dot(normalize(lemming.Velocity), n) > 0)
         {
             n = -n;
         }
         lemming.Acceleration += float2(0, 1);
-        lemming.Velocity = project(lemming.Velocity * (1 - abs(t)), n);
+        lemming.Velocity = project(lemming.Velocity, n);
         lemming.Velocity.y *= 0.1;
-        // lemming.Velocity = normalize(lemming.Velocity) * clamp(length(lemming.Velocity), 0.1, 10);
+        lemming.Velocity = normalize(lemming.Velocity) * clamp(length(lemming.Velocity), 0.1, 10);
         lemming.Velocity += lemming.Acceleration;
     }
 }
