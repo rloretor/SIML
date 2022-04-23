@@ -1,57 +1,13 @@
 ﻿#pragma kernel LemmingsMovementPassKernel
-
-struct Lemming
-{
-    float2 Position;
-    float2 Velocity;
-    float2 Acceleration;
-};
-
-struct rect
-{
-    float2 Position;
-    float2 Size;
-};
+#include "../Shared/LemmingsSimulationShared.cginc"
 
 RWStructuredBuffer<Lemming> _Lemmings;
 Texture2D _collisionBitMap;
+Texture2D _terrainAnalysisTexture;
 SamplerState _linearClampSampler;
 
-Texture2D _terrainAnalysisTexture;
 bool _Simulate;
-
-cbuffer once {float2 _texDimensions;float2 _MaxBound; float2 _MinBound; float _DeltaTime; float _Time;};
-
 #define Gravity  4.9
-#define WorldSize (_MaxBound - _MinBound)
-
-float2 computeUV(float2 position)
-{
-    return (position - _MinBound) / WorldSize;
-}
-
-float2 computePos(float2 uv)
-{
-    return ((uv * WorldSize) + _MinBound);
-}
-
-float2 computePixelUV(float2 uv, float2 d)
-{
-    return (floor(uv * _texDimensions) + d) / _texDimensions;
-}
-
-
-//projection b over a
-float2 project(float2 b, float2 a)
-{
-    return (dot(a, b) / dot(a, a)) * a;
-}
-
-//https://github.com/ashima/webgl-noise/blob/master/src/noise2D.glsl
-float hash(float2 x)
-{
-    return frac(sin(dot(x, float2(12.9898, 78.233))) * 43758.5453);
-}
 
 void FixOutOfBounds(inout Lemming lemming, float2 posUV)
 {
@@ -73,10 +29,10 @@ bool Ray2Rect(rect r, float2 p0, float2 D, out float t, out float2 n)
     #define _d  float2(1, 0)
     float2 X, Y;
     // find closest X axis and Y axis intersection points
-    X[0] = Ray2Ray(p0, D, r.Position - r.Size, _d.xy);
-    Y[0] = Ray2Ray(p0, D, r.Position - r.Size, _d.yx);
-    X[1] = Ray2Ray(p0, D, r.Position + r.Size, _d.xy);
-    Y[1] = Ray2Ray(p0, D, r.Position + r.Size, _d.yx);
+    X[0] = Ray2Ray(p0, D, r.Position - r.Size / 2.0, _d.xy);
+    Y[0] = Ray2Ray(p0, D, r.Position - r.Size / 2.0, _d.yx);
+    X[1] = Ray2Ray(p0, D, r.Position + r.Size / 2.0, _d.xy);
+    Y[1] = Ray2Ray(p0, D, r.Position + r.Size / 2.0, _d.yx);
 
     n[0] = max(min(X[0], X[1]), min(Y[0], Y[1])); // reusing existing register normal = tmin 
     n[1] = min(max(X[0], X[1]), max(Y[0], Y[1])); // replace r.position by tmin and r.size by tmax
@@ -88,7 +44,7 @@ void FixCollision(inout Lemming lemming, float2 uv)
 {
     rect pixel;
     pixel.Position = computePos(computePixelUV(uv, 0.5));
-    pixel.Size = abs((computePos(computePixelUV(uv, 0)) - pixel.Position)) + 4;
+    pixel.Size = abs((computePos(computePixelUV(uv, 0) * 2) - pixel.Position)) + 4;
     float t = 0;
     float2 n = 0;
     bool c = Ray2Rect(pixel, lemming.Position, lemming.Velocity * _DeltaTime, t, n);

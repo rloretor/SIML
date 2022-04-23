@@ -18,20 +18,19 @@ Shader "Instanced/DebugDrawTerrain"
             #pragma target 4.5
 
             #include "AutoLight.cginc"
-
+            #include "../Shared/LemmingsSimulationShared.cginc"
             uint _instances;
-            sampler2D _analysisTexture;
-            float4 _analysisTexture_ST;
-            float4 _analysisTexture_TexelSize;
 
-            sampler2D _collisionTexture;
-            float4 _collisionTexture_ST;
-            float4 _collisionTexture_TexelSize;
+            sampler2D _collisionBitMap;
+            float4 _collisionBitMap_ST;
+            float4 _collisionBitMap_TexelSize;
+            sampler2D _terrainAnalysisTexture;
+            float4 _terrainAnalysisTexture_ST;
+            float4 _terrainAnalysisTexture_TexelSize;
+
             float _width;
             float _height;
-            float2 _boundsMin;
-            float2 _boundsMax;
-            #define _size (_boundsMax - _boundsMin)
+
             #define _texDimensions (float2(_width,_height))
 
             struct appdata
@@ -55,22 +54,7 @@ Shader "Instanced/DebugDrawTerrain"
                 half4 color : SV_Target1;
                 float depth : SV_Depth;
             };
-
-            float2 computeUV(float2 position)
-            {
-                return (position - _boundsMin) / _size;
-            }
-
-            float2 computePos(float2 uv)
-            {
-                return ((uv * _size) + _boundsMin);
-            }
-
-            float2 computePixelUV(float2 uv)
-            {
-                return (floor(uv * _texDimensions) + 0.5) / _texDimensions;
-            }
-
+            
             #define Rot(a)  float2x2(cos(a), sin(a),-sin(a), cos(a))
 
             v2f vert(appdata v, uint instanceID : SV_InstanceID)
@@ -79,14 +63,14 @@ Shader "Instanced/DebugDrawTerrain"
                 float row = ((instanceID) / _width * 1.0);
                 float col = (fmod(instanceID, _width * 1.0));
                 float2 uv = float2(col + 0.5, row + 0.5) / _texDimensions;
-                float3 data = tex2Dlod(_analysisTexture, float4(uv.xy, 0, 0)).xyz;
+                float3 data = tex2Dlod(_terrainAnalysisTexture, float4(uv.xy, 0, 0)).xyz;
                 float2 p = computePos(uv);
-                float2 pp = _boundsMin + (uv.xy + normalize(data.xy) * data.z) * _size;
+                float2 pp = _MinBound + (uv.xy + normalize(data.xy) * data.z) * WorldSize;
 
                 const float2 V = normalize(data.xy);
                 v.vertex.y += 0.5;
                 v.vertex.x *= 0.3 * (1.1 - v.vertex.y);
-                v.vertex.x *= _size.x / _width * 0.3;
+                v.vertex.x *= WorldSize.x / _width * 0.3;
                 v.vertex.y *= distance(pp, p);
                 //  v.vertex.y += distance(pp, p) / 2;
                 v.vertex.xy = mul(Rot(atan2(V.x,V.y)), v.vertex.xy);

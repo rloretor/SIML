@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Net.Mail;
+using Test;
+using Unity.Mathematics;
+using UnityEditor;
 using UnityEngine;
 
 [ExecuteAlways]
@@ -18,7 +21,7 @@ public class PenetrationTest : MonoBehaviour
     private void OnDrawGizmos()
     {
         // DrawProjection();
-        DrawIntersection();
+        // DrawIntersection();
     }
 
     private void DrawProjection()
@@ -38,69 +41,5 @@ public class PenetrationTest : MonoBehaviour
         Gizmos.DrawLine(penPos.position, penPos.position + (Vector3) displ);
         Gizmos.color = Color.cyan;
         Gizmos.DrawLine(penPos.position, vel.position);
-    }
-
-    private void DrawIntersection()
-    {
-        Vector2 p0 = fixedPos.position;
-        Vector2 d0 = ((Vector2) penPos.position - p0);
-        Vector2 p1 = pixelPos.position;
-        Vector2 s = ((Vector2) vel.position - p1) / 2.0f;
-        s.x = Mathf.Abs(s.x);
-        s.y = Mathf.Abs(s.y);
-        Gizmos.DrawCube(p1, s * 2);
-
-        Vector2 X = new Vector2();
-        Vector2 Y = new Vector2();
-        X[0] = RayVsRay(p0, d0, p1 - s, Vector2.right);
-        Y[0] = RayVsRay(p0, d0, p1 - s, Vector2.up);
-        X[1] = RayVsRay(p0, d0, p1 + s, Vector2.right);
-        Y[1] = RayVsRay(p0, d0, p1 + s, Vector2.up);
-
-        Gizmos.DrawLine(p0, penPos.position);
-
-        Gizmos.DrawLine(p1, vel.position);
-
-        float tmin = Mathf.Max(Mathf.Min(X[0], X[1]), Mathf.Min(Y[0], Y[1]));
-        float tmax = Mathf.Min(Mathf.Max(X[0], X[1]), Mathf.Max(Y[0], Y[1]));
-        float t = tmin < 0f ? tmax : tmin;
-        if (tmax < 0 || tmin > tmax || t > 1)
-        {
-            Gizmos.color = Color.black;
-        }
-        else
-        {
-            Debug.Log("[" + tmin + " - " + tmax + "] " + d0.magnitude);
-
-            Vector2 p = d0 * t + p0;
-            Gizmos.DrawWireSphere(d0 * tmin + p0, 20.0f);
-            Gizmos.DrawWireSphere(d0 * tmax + p0, 20.0f);
-            Vector2 n = (p - p1);
-            Vector2 a = new Vector2(Mathf.Abs(n.x), Mathf.Abs(n.y));
-            if (a.x > a.y)
-            {
-                n = Vector2.right * Mathf.Sign(n.x);
-            }
-            else
-            {
-                n = Vector2.up * Mathf.Sign(n.y);
-            }
-
-            Gizmos.DrawLine(p, p + n);
-        }
-    }
-
-    float norm(float v, float min, float max)
-    {
-        return (v - min) / (max - min);
-    }
-
-    float RayVsRay(Vector2 a, Vector2 ad, Vector2 b, Vector2 bd)
-    {
-        float dx = b.x - a.x;
-        float dy = b.y - a.y;
-        float u = (dy * bd.x - dx * bd.y) / ((bd.x * ad.y) - (bd.y * ad.x));
-
-        return u;
     }
 }

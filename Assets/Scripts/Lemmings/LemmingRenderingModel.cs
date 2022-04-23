@@ -1,4 +1,5 @@
 using System;
+using Lemmings.Shared;
 using UnityEngine;
 
 namespace Lemmings
@@ -21,13 +22,13 @@ namespace Lemmings
 
 
             LemmingMaterial.SetBuffer("_LemmingsBuffer", simulationModel.SimulationRWBuffer);
-            LemmingMaterial.SetInt("_Instances", simulationModel.LemmingInstances);
+            LemmingMaterial.SetInt(SharedVariablesModel.Instances, simulationModel.LemmingInstances);
             if (controller != null)
             {
-                LemmingMaterial.SetTexture("_collisionBitMap", controller.TerrainBitRT);
+                LemmingMaterial.SetTexture(SharedVariablesModel.collisionBitMap, controller.TerrainBitRT);
 
-                LemmingMaterial.SetVector("_minBounds", sceneModel.bounds.BotLeft());
-                LemmingMaterial.SetVector("_maxBounds", sceneModel.bounds.TopRight());
+                LemmingMaterial.SetVector(SharedVariablesModel.MinBound, sceneModel.bounds.BotLeft());
+                LemmingMaterial.SetVector(SharedVariablesModel.MaxBound, sceneModel.bounds.TopRight());
             }
         }
 

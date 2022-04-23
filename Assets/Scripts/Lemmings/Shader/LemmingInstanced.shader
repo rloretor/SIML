@@ -18,24 +18,14 @@ Shader "Instanced/LemmingInstanced"
             #pragma target 4.5
 
             #include "AutoLight.cginc"
-
-            struct Lemming
-            {
-                float2 Position;
-                float2 Velocity;
-                float2 Acceleration;
-            };
+            #include "../Shared/LemmingsSimulationShared.cginc"
 
             StructuredBuffer<Lemming> _LemmingsBuffer;
 
-            uint _Instances;
             sampler2D _collisionBitMap;
             float4 _collisionBitMap_ST;
             float4 _collisionBitMap_TexelSize;
 
-            float2 _minBounds;
-            float2 _maxBounds;
-            #define _size (_maxBounds-_minBounds)
 
             struct appdata
             {
@@ -59,14 +49,7 @@ Shader "Instanced/LemmingInstanced"
                 float depth : SV_Depth;
             };
 
-
-            #define Rot(a)  float2x2(cos(a), sin(a),-sin(a), cos(a))
-
-            float2 computeUV(float2 position)
-            {
-                return (position - _minBounds) / _size;
-            }
-
+            
             v2f vert(appdata v, uint instanceID : SV_InstanceID)
             {
                 v2f o;

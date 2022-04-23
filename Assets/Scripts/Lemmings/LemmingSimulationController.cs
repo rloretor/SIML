@@ -1,3 +1,4 @@
+using Lemmings.Shared;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -68,14 +69,13 @@ namespace Lemmings
 
         private void UpdateComputeShader()
         {
-            SimulationModel.SimulationShader.SetVector("_MaxBound", SimulationModel.Bounds.TopRight());
-            SimulationModel.SimulationShader.SetVector("_MinBound", SimulationModel.Bounds.BotLeft());
-            SimulationModel.SimulationShader.SetVector("_texDimensions", new Vector2(terrainController.TerrainAnalysis.width, terrainController.TerrainAnalysis.height));
-            SimulationModel.SimulationShader.SetFloat("_DeltaTime", Time.deltaTime);
-            SimulationModel.SimulationShader.SetFloat("_Time", Time.time);
             SimulationModel.SimulationShader.SetBool("_Simulate", this.simulate);
-            SimulationModel.SimulationShader.SetTexture(SimulationModel.ComputeKernel, "_collisionBitMap", terrainController.TerrainBitRT);
-            SimulationModel.SimulationShader.SetTexture(SimulationModel.ComputeKernel, "_terrainAnalysisTexture", terrainController.TerrainAnalysis);
+            SimulationModel.SimulationShader.SetVector(SharedVariablesModel.MaxBound, SimulationModel.Bounds.TopRight());
+            SimulationModel.SimulationShader.SetVector(SharedVariablesModel.MinBound, SimulationModel.Bounds.BotLeft());
+            SimulationModel.SimulationShader.SetVector(SharedVariablesModel.TexDimensions, new Vector2(terrainController.TerrainAnalysis.width, terrainController.TerrainAnalysis.height));
+            SimulationModel.SimulationShader.SetFloat(SharedVariablesModel.DeltaTime, Time.deltaTime);
+            SimulationModel.SimulationShader.SetTexture(SimulationModel.ComputeKernel, SharedVariablesModel.collisionBitMap, terrainController.TerrainBitRT);
+            SimulationModel.SimulationShader.SetTexture(SimulationModel.ComputeKernel, SharedVariablesModel.terrainAnalysisTexture, terrainController.TerrainAnalysis);
         }
 
         private void Simulate()
