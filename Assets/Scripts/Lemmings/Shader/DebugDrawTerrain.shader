@@ -54,7 +54,7 @@ Shader "Instanced/DebugDrawTerrain"
                 half4 color : SV_Target1;
                 float depth : SV_Depth;
             };
-            
+
             #define Rot(a)  float2x2(cos(a), sin(a),-sin(a), cos(a))
 
             v2f vert(appdata v, uint instanceID : SV_InstanceID)
@@ -65,14 +65,14 @@ Shader "Instanced/DebugDrawTerrain"
                 float2 uv = float2(col + 0.5, row + 0.5) / _texDimensions;
                 float3 data = tex2Dlod(_terrainAnalysisTexture, float4(uv.xy, 0, 0)).xyz;
                 float2 p = computePos(uv);
-                float2 pp = _MinBound + (uv.xy + normalize(data.xy) * data.z) * WorldSize;
+                float2 pp = computePos(uv + data.xy * data.z);
 
                 const float2 V = normalize(data.xy);
-                v.vertex.y += 0.5;
+                // v.vertex.y += 0.5;
                 v.vertex.x *= 0.3 * (1.1 - v.vertex.y);
                 v.vertex.x *= WorldSize.x / _width * 0.3;
                 v.vertex.y *= distance(pp, p);
-                //  v.vertex.y += distance(pp, p) / 2;
+                // v.vertex.y += distance(pp, p) / 2;
                 v.vertex.xy = mul(Rot(atan2(V.x,V.y)), v.vertex.xy);
 
 

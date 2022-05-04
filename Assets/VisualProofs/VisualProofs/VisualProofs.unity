@@ -151,38 +151,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   IntersectionTests:
-  - Rect:
-      serializedVersion: 2
-      x: 0
-      y: 0
-      width: 2
-      height: 2
-    Origin: {x: -1, y: 1}
+  - Center: {x: 1, y: 0}
+    rectSize: {x: 0.5, y: 1.02}
+    Origin: {x: 0, y: 0}
     Direction: {x: 1, y: 0}
-  - Rect:
-      serializedVersion: 2
-      x: 0
-      y: 0
-      width: 2
-      height: 2
-    Origin: {x: 0.77, y: 1}
+  - Center: {x: 1.5, y: 0}
+    rectSize: {x: 0.4, y: 0}
+    Origin: {x: 0, y: 0}
     Direction: {x: 1, y: 0}
-  - Rect:
-      serializedVersion: 2
-      x: 0
-      y: 0
-      width: 2
-      height: 2
-    Origin: {x: 0.69, y: 1}
-    Direction: {x: 2.38, y: 0}
-  - Rect:
-      serializedVersion: 2
-      x: 0
-      y: 0
-      width: 2
-      height: 2
-    Origin: {x: -0.59, y: 1}
-    Direction: {x: 0.43, y: 0}
+  - Center: {x: 5, y: 0}
+    rectSize: {x: 0.5, y: 0}
+    Origin: {x: 5, y: 0}
+    Direction: {x: 1, y: 0}
+  - Center: {x: 9, y: -1}
+    rectSize: {x: 2, y: 2}
+    Origin: {x: 7, y: -1}
+    Direction: {x: 1, y: 1}
   testsPerLine: 4
   separationPerLine: 5
 --- !u!4 &145248377
@@ -281,4 +265,52 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &471047166
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 471047168}
+  - component: {fileID: 471047167}
+  m_Layer: 0
+  m_Name: RayRay
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &471047167
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 471047166}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a02a92e724f24932b743a4432783d338, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  IntersectionTests: []
+  HztalSeparation: 3
+  VtcalSeparation: 5
+  rowSize: 16
+  columnSize: 8
+--- !u!4 &471047168
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 471047166}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -13.9, y: -18, z: -13.808922}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

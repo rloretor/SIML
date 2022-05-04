@@ -1,0 +1,49 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel Ray2RayKernel
+#pragma kernel Ray2BoxKernel
+
+#include "Assets/Scripts/Lemmings/Shared/LemmingsSimulationShared.cginc"
+
+struct RayBox
+{
+    float2 o;
+    float2 D;
+    float2 c;
+    float2 s;
+    int result;
+    float3 resultData;
+};
+
+struct RayRay
+{
+    float2 o0;
+    float2 o1;
+    float2 d0;
+    float2 d1;
+    float result;
+};
+
+RWStructuredBuffer<RayRay> _RayRayBuffer;
+RWStructuredBuffer<RayBox> _RayBoxBuffer;
+
+[numthreads(1,1,1)]
+void Ray2RayKernel(uint3 id : SV_DispatchThreadID)
+{
+    RayRay data = _RayRayBuffer[id.x];
+    data.result = Ray2Ray(data.o0, data.d0, data.o1, data.d1);
+    _RayRayBuffer[id.x] = data;
+}
+
+[numthreads(1,1,1)]
+void Ray2BoxKernel(uint3 id : SV_DispatchThreadID)
+{
+    RayBox data = _RayBoxBuffer[id.x];
+    rect r;
+    r.Position = data.c;
+    r.Size = data.s;
+    float t;
+    float2 n;
+    data.result = Ray2Rect(r, data.o, data.D, t, n);
+    data.resultData = float3(t, n.xy);
+    _RayBoxBuffer[id.x] = data;
+}

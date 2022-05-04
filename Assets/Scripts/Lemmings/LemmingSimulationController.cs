@@ -56,7 +56,7 @@ namespace Lemmings
             UpdateComputeShader();
             Simulate();
             Draw();
-            terrainDebugController.DrawDebug();
+            //terrainDebugController.DrawDebug();
             simulate = false;
         }
 
@@ -74,6 +74,7 @@ namespace Lemmings
             SimulationModel.SimulationShader.SetVector(SharedVariablesModel.MinBound, SimulationModel.Bounds.BotLeft());
             SimulationModel.SimulationShader.SetVector(SharedVariablesModel.TexDimensions, new Vector2(terrainController.TerrainAnalysis.width, terrainController.TerrainAnalysis.height));
             SimulationModel.SimulationShader.SetFloat(SharedVariablesModel.DeltaTime, Time.deltaTime);
+            SimulationModel.SimulationShader.SetVector("mousePos", Camera.main.ScreenToWorldPoint(Input.mousePosition));
             SimulationModel.SimulationShader.SetTexture(SimulationModel.ComputeKernel, SharedVariablesModel.collisionBitMap, terrainController.TerrainBitRT);
             SimulationModel.SimulationShader.SetTexture(SimulationModel.ComputeKernel, SharedVariablesModel.terrainAnalysisTexture, terrainController.TerrainAnalysis);
         }

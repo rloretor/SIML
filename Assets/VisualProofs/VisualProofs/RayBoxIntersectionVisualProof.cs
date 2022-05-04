@@ -8,9 +8,10 @@ using UnityEngine.UI;
 namespace Test.VisualProofs
 {
     [Serializable]
-    public class IntersectionTestExample
+    public class RayIBoxIntersectionTestExample
     {
-        public Rect Rect;
+        public Vector2 Center;
+        public Vector2 rectSize;
         public Vector2 Origin;
         public Vector2 Direction;
 
@@ -21,8 +22,8 @@ namespace Test.VisualProofs
                     Vector3.Min(
                         Origin,
                         Origin + Direction),
-                    Rect.min),
-                Rect.max);
+                    Center - rectSize / 2.0f),
+                Center + rectSize / 2.0f);
         }
 
         public Vector3 GetMax()
@@ -32,8 +33,8 @@ namespace Test.VisualProofs
                     Vector3.Max(
                         Origin,
                         Origin + Direction),
-                    Rect.min),
-                Rect.max);
+                    Center - rectSize / 2.0f),
+                Center + rectSize / 2.0f);
         }
 
         public Vector3 Size()
@@ -45,20 +46,20 @@ namespace Test.VisualProofs
 
     public class RayBoxIntersectionVisualProof : MonoBehaviour
     {
-        public List<IntersectionTestExample> IntersectionTests = new List<IntersectionTestExample>();
+        public List<RayIBoxIntersectionTestExample> IntersectionTests = new List<RayIBoxIntersectionTestExample>();
         public int testsPerLine = 5;
         public int separationPerLine = 5;
 
         private void OnDrawGizmos()
         {
-            IntersectionTestExample intersection = IntersectionTests[0];
+            RayIBoxIntersectionTestExample rayRayIntersection = IntersectionTests[0];
             Vector3 offset = transform.position;
-            DrawIntersection(intersection.Origin, intersection.Direction, intersection.Rect.center, intersection.Rect.size, offset);
+            DrawIntersection(rayRayIntersection.Origin, rayRayIntersection.Direction, rayRayIntersection.Center, rayRayIntersection.rectSize, offset);
 
             int index;
             for (index = 1; index < IntersectionTests.Count; index++)
             {
-                intersection = IntersectionTests[index];
+                rayRayIntersection = IntersectionTests[index];
                 if (index % testsPerLine == 0)
                 {
                     offset.y = transform.position.y - separationPerLine * index / testsPerLine;
@@ -66,11 +67,11 @@ namespace Test.VisualProofs
                 }
                 else
                 {
-                    offset.x += (IntersectionTests[index].Rect.size * 2).x;
+                    offset.x += (IntersectionTests[index].rectSize * 2).x;
                 }
 
 
-                DrawIntersection(intersection.Origin, intersection.Direction, intersection.Rect.center, intersection.Rect.size, offset);
+                DrawIntersection(rayRayIntersection.Origin, rayRayIntersection.Direction, rayRayIntersection.Center, rayRayIntersection.rectSize, offset);
             }
 
             index = (int) Mathf.Ceil((float) index / testsPerLine) * testsPerLine;
@@ -82,11 +83,12 @@ namespace Test.VisualProofs
                     float x = Mathf.Sin(i * Mathf.PI / 8);
                     float y = Mathf.Cos(i * Mathf.PI / 8);
                     Vector2 size = Vector2.one * 2.0f;
-                    IntersectionTestExample example = new IntersectionTestExample()
+                    RayIBoxIntersectionTestExample example = new RayIBoxIntersectionTestExample()
                     {
                         Origin = size / 2 + new Vector2(x, y) * (j),
                         Direction = new Vector2(x, y),
-                        Rect = new Rect(Vector2.zero, size)
+                        Center = Vector2.zero,
+                        rectSize = size
                     };
 
 
@@ -101,7 +103,7 @@ namespace Test.VisualProofs
                     }
 
                     index += 1;
-                    DrawIntersection(example.Origin, example.Direction, example.Rect.center, example.Rect.size, offset);
+                    DrawIntersection(example.Origin, example.Direction, example.Center, example.rectSize, offset);
                 }
             }
         }
@@ -126,6 +128,8 @@ namespace Test.VisualProofs
                 Gizmos.DrawLine(p0 + d0 * t, (p0 + d0 * t) + new Vector2(n.x, n.y));
                 Gizmos.DrawLine(p0 + Vector2.up * -0.1f, p0 + Vector2.down * 0.1f);
                 Gizmos.DrawIcon((p0 + d0 * t) + new Vector2(n.x, n.y), "winbtn_win_max_h", true, Gizmos.color);
+                Handles.Label(p0 + d0 * -.3f, $"t {t}");
+
                 Gizmos.color = Color.green;
             }
             else

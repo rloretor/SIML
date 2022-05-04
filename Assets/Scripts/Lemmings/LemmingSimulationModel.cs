@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
-using Random = System.Random;
 
 namespace Lemmings
 {
@@ -44,7 +43,7 @@ namespace Lemmings
                 var direction = UnityEngine.Random.insideUnitCircle.normalized + Vector2.one * UnityEngine.Random.Range(0, 1.0f);
                 var pos = (Vector2) SpawnPoints[spawnPointId].position + direction; //  Bounds.UV(new Vector2(0.5f, 0.5f)); //Bounds.RandomPointInBounds();
                 //pos += Bounds.UV(new Vector2(UnityEngine.Random.Range(0, 1.0f), UnityEngine.Random.Range(0, 1.0f))); // Bounds.RandomPointInBounds();
-                var vel = Vector2.right + (Vector2.right * UnityEngine.Random.Range(0, 100));
+                var vel = Vector2.right + (Vector2.right * UnityEngine.Random.Range(-2, 2));
                 lemmingList.Add(new LemmingKinematicModel()
                 {
                     Position = pos,
