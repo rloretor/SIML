@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Lemmings.Shared;
 using UnityEngine;
 
 namespace Lemmings
@@ -28,12 +29,12 @@ namespace Lemmings
             int height = terrainSimulationController.TerrainAnalysis.height;
             int instances = width * height;
             RenderQuadMaterial.SetInt("_instances", instances);
-            RenderQuadMaterial.SetTexture("_analysisTexture", terrainSimulationController.TerrainAnalysis);
-            RenderQuadMaterial.SetTexture("_collisionTexture", terrainSimulationController.TerrainBitRT);
             RenderQuadMaterial.SetFloat("_width", width);
             RenderQuadMaterial.SetFloat("_height", height);
-            RenderQuadMaterial.SetVector("_boundsMin", bounds.BotLeft());
-            RenderQuadMaterial.SetVector("_boundsMax", bounds.TopRight());
+            RenderQuadMaterial.SetTexture(SharedVariablesModel.terrainAnalysisTexture, terrainSimulationController.TerrainAnalysis);
+            RenderQuadMaterial.SetTexture(SharedVariablesModel.collisionBitMap, terrainSimulationController.TerrainBitRT);
+            RenderQuadMaterial.SetVector(SharedVariablesModel.MinBound, bounds.BotLeft());
+            RenderQuadMaterial.SetVector(SharedVariablesModel.MaxBound, bounds.TopRight());
             Graphics.DrawMeshInstancedProcedural(quad, 0, RenderQuadMaterial, bounds.GetBounds(), instances);
         }
     }
