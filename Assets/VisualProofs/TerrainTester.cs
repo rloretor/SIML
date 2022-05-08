@@ -1,4 +1,5 @@
 ﻿using Lemmings;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.UI;
@@ -34,14 +35,36 @@ public class TerrainTester : MonoBehaviour
     }
 }
 
-public static class RenderTextureExtensions
+public static class TextureExtensions
 {
-    public static Texture2D toTexture2D(this RenderTexture rTex)
+    public static Texture2D toTexture2D(this RenderTexture rTex, TextureFormat t = TextureFormat.RGB24)
     {
-        Texture2D tex = new Texture2D(rTex.width, rTex.height, TextureFormat.RGB24, false);
+        Texture2D tex = new Texture2D(rTex.width, rTex.height, t, false)
+        {
+            filterMode = FilterMode.Point, anisoLevel = 0
+        };
         RenderTexture.active = rTex;
         tex.ReadPixels(new Rect(0, 0, rTex.width, rTex.height), 0, 0);
         tex.Apply();
         return tex;
+    }
+
+    public static Texture2D toTexture2D(this RenderTexture rTex, GraphicsFormat t)
+    {
+        Texture2D tex = new Texture2D(rTex.width, rTex.height, t, TextureCreationFlags.None)
+        {
+            filterMode = FilterMode.Point, anisoLevel = 0
+        };
+        RenderTexture.active = rTex;
+        tex.ReadPixels(new Rect(0, 0, rTex.width, rTex.height), 0, 0);
+        tex.Apply();
+        return tex;
+    }
+
+    public static Color GetPixelFromUV(this Texture2D rTex, float2 uv)
+    {
+        int x = Mathf.FloorToInt(uv.x * rTex.width);
+        int y = Mathf.FloorToInt(uv.y * rTex.height);
+        return rTex.GetPixel(x, y);
     }
 }

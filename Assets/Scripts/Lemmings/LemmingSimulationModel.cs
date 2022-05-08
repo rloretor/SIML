@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using UnityEngine;
+using Random = System.Random;
+using Vector2 = UnityEngine.Vector2;
 
 namespace Lemmings
 {
@@ -17,8 +20,9 @@ namespace Lemmings
         private const int GroupSize = 512;
 
         public ComputeBuffer SimulationRWBuffer { get; private set; }
-        private List<LemmingKinematicModel> lemmingList = new List<LemmingKinematicModel>();
+        public List<LemmingKinematicModel> lemmingList = new List<LemmingKinematicModel>();
         public int ComputeKernel { get; private set; }
+
 
         public void Init()
         {
@@ -39,11 +43,11 @@ namespace Lemmings
             lemmingList.Capacity = LemmingInstances;
             for (var i = 0; i < LemmingInstances; i++)
             {
-                var spawnPointId = UnityEngine.Random.Range(0, SpawnPoints.Length);
-                var direction = UnityEngine.Random.insideUnitCircle.normalized + Vector2.one * UnityEngine.Random.Range(0, 1.0f);
+                var spawnPointId = (int) (i % (SpawnPoints.Length));
+                var direction = UnityEngine.Random.insideUnitCircle + Vector2.one * UnityEngine.Random.Range(0, 1.0f);
                 var pos = (Vector2) SpawnPoints[spawnPointId].position + direction; //  Bounds.UV(new Vector2(0.5f, 0.5f)); //Bounds.RandomPointInBounds();
                 //pos += Bounds.UV(new Vector2(UnityEngine.Random.Range(0, 1.0f), UnityEngine.Random.Range(0, 1.0f))); // Bounds.RandomPointInBounds();
-                var vel = Vector2.right + (Vector2.right * UnityEngine.Random.Range(-2, 2));
+                var vel = direction;
                 lemmingList.Add(new LemmingKinematicModel()
                 {
                     Position = pos,

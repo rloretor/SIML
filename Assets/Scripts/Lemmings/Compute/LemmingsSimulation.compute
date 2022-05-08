@@ -1,6 +1,7 @@
 ﻿#pragma kernel LemmingsMovementPassKernel
 #include "../Shared/LemmingsSimulationShared.cginc"
 
+
 RWStructuredBuffer<Lemming> _Lemmings;
 Texture2D _collisionBitMap;
 Texture2D _terrainAnalysisTexture;
@@ -17,74 +18,83 @@ void FixOutOfBounds(inout Lemming lemming, float2 posUV)
     lemming.Position = clamp(lemming.Position, _MinBound, _MaxBound);
 }
 
-float Ray2Ray(float2 a, float2 ad, float2 b, float2 bd)
+rect GetLemmingCollision(float2 p)
 {
-    #define dx (b.x - a.x)
-    #define dy  (b.y - a.y)
-    return (dy * bd.x - dx * bd.y) / ((bd.x * ad.y) - (bd.y * ad.x));
+    float2 s = _lemmingSize;
+    float2 d = float2(1, 0);
+    const float2 corners[6] =
+    {
+        float2(p - s),
+        float2(p + d.xy * s.x - d.yx * s.y),
+        float2(p - d.xy * s.x - d.yx * s.y),
+        float2(p - d.yx * s),
+        float2(p + d.xy * s),
+        float2(p - d.xy * s),
+    };
+    const float2 pixelSize = WorldSize / _texDimensions;
+
+    float2 maxS = -1000.0;
+    float2 minS = 1000.0;
+    float2 puv;
+    for (int i = 0; i < 6; i++)
+    {
+        puv = computeUV(corners[i]);
+        float2 pixelPos = computePos(computePixelUV(puv, 0.5));
+
+        if (_collisionBitMap.SampleLevel(_linearClampSampler, puv, 0).x == 0.0)
+        {
+            maxS = max(maxS, pixelPos + pixelSize / 2);
+            minS = min(minS, pixelPos - pixelSize / 2);
+        }
+    }
+
+    rect collisionPixel;
+    collisionPixel.Position = (maxS + minS) / 2.0;
+    collisionPixel.Size = (maxS - minS);
+    return collisionPixel;
 }
 
-bool Ray2Rect(rect r, float2 p0, float2 D, out float t, out float2 n)
+void FixCollision(inout Lemming lemming, rect pixel)
 {
-    #define _d  float2(1, 0)
-    float2 X, Y;
-    // find closest X axis and Y axis intersection points
-    X[0] = Ray2Ray(p0, D, r.Position - r.Size / 2.0, _d.xy);
-    Y[0] = Ray2Ray(p0, D, r.Position - r.Size / 2.0, _d.yx);
-    X[1] = Ray2Ray(p0, D, r.Position + r.Size / 2.0, _d.xy);
-    Y[1] = Ray2Ray(p0, D, r.Position + r.Size / 2.0, _d.yx);
-
-    n[0] = max(min(X[0], X[1]), min(Y[0], Y[1])); // reusing existing register normal = tmin 
-    n[1] = min(max(X[0], X[1]), max(Y[0], Y[1])); // replace r.position by tmin and r.size by tmax
-    t = min(n[1], n[0]);
-    return !(n[1] < 0 || n[0] > n[1] || t > 1);
-}
-
-void FixCollision(inout Lemming lemming, float2 uv)
-{
-    rect pixel;
-    pixel.Position = computePos(computePixelUV(uv, 0.5));
-    pixel.Size = abs((computePos(computePixelUV(uv, 0) * 2) - pixel.Position)) + 4;
     float t = 0;
     float2 n = 0;
-    bool c = Ray2Rect(pixel, lemming.Position, lemming.Velocity * _DeltaTime, t, n);
+    float2 dvdt = lemming.Velocity * _DeltaTime;
+    bool c = Ray2Rect(pixel, lemming.Position, dvdt, t, n);
     if (c)
     {
-        lemming.Position = lemming.Position + lemming.Velocity * _DeltaTime * t;
-        float3 sdf = _terrainAnalysisTexture.SampleLevel(_linearClampSampler,
-                                                         computePixelUV(computeUV(lemming.Position), float2(0, 1)),
-                                                         0);
-        n = n.yx;
-        if (dot(normalize(lemming.Velocity), n) > 0)
-        {
-            n = -n;
-        }
-        lemming.Acceleration += float2(0, 1);
-        lemming.Velocity = project(lemming.Velocity, n);
-        lemming.Velocity.y *= 0.1;
-        lemming.Velocity = normalize(lemming.Velocity) * clamp(length(lemming.Velocity), 0.1, 10);
+        float2 newPosition = lemming.Position + dvdt * t;
+        lemming.Position = newPosition;
+
+        lemming.Velocity = n.yx;
+        lemming.Velocity.y *= 0.2f;
+        lemming.Velocity = normalize(lemming.Velocity) * clamp(length(lemming.Velocity), 0.1, 10.0);
         lemming.Velocity += lemming.Acceleration;
     }
+
+    lemming.Position = lemming.Position + lemming.Velocity * _DeltaTime;
 }
 
 
 [numthreads(512,1,1)]
 void LemmingsMovementPassKernel(uint3 id : SV_DispatchThreadID)
 {
-    if (_Simulate)
+    // if (_Simulate)
     {
         Lemming lemming = _Lemmings[id.x];
-        float2 p = lemming.Position + lemming.Velocity * _DeltaTime;
-        float2 uv = computeUV(p);
-        if (_collisionBitMap.SampleLevel(_linearClampSampler, uv, 0).x == 0)
+        float2 uv = computeUV(lemming.Position + lemming.Velocity * _DeltaTime);
+        rect pixel = GetLemmingCollision(lemming.Position);
+        bool2 collides = pixel.Size != (-2000.0); // maybe
+        if (collides.x || collides.y)
         {
-            FixCollision(lemming, uv);
+            pixel.Size += _lemmingSize / 2.0f;
+            FixCollision(lemming, pixel);
         }
         else
         {
             lemming.Acceleration = -float2(0, Gravity);
             lemming.Velocity += lemming.Acceleration * _DeltaTime;
             lemming.Position += lemming.Velocity * _DeltaTime;
+            lemming.Acceleration = 0;
         }
         FixOutOfBounds(lemming, uv);
         _Lemmings[id.x] = lemming;

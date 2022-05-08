@@ -117,17 +117,17 @@ namespace Test.VisualProofs
 
             LemmingsShaderMathUtil util = new LemmingsShaderMathUtil();
             float2 n = new float2();
-            float t = 0;
+            double t = 0;
             bool collides = util.Ray2Rect(new LemmingsShaderMathUtil.Rect(p1, s), new float2(p0.x, p0.y), new float2(d0.x, d0.y), out t, out n);
             if (collides)
             {
                 Gizmos.color = Color.green;
 
-                Gizmos.DrawSphere(p0 + d0 * t, 0.1f);
+                Gizmos.DrawSphere(p0 + d0 * (float) t, 0.1f);
                 Gizmos.color = Color.yellow;
-                Gizmos.DrawLine(p0 + d0 * t, (p0 + d0 * t) + new Vector2(n.x, n.y));
+                Gizmos.DrawLine(p0 + d0 * (float) t, (p0 + d0 * (float) t) + new Vector2(n.x, n.y));
                 Gizmos.DrawLine(p0 + Vector2.up * -0.1f, p0 + Vector2.down * 0.1f);
-                Gizmos.DrawIcon((p0 + d0 * t) + new Vector2(n.x, n.y), "winbtn_win_max_h", true, Gizmos.color);
+                Gizmos.DrawIcon((p0 + d0 * (float) t) + new Vector2(n.x, n.y), "winbtn_win_max_h", true, Gizmos.color);
                 Handles.Label(p0 + d0 * -.3f, $"t {t}");
 
                 Gizmos.color = Color.green;

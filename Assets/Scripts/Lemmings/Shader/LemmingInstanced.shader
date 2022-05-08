@@ -55,14 +55,7 @@ Shader "Instanced/LemmingInstanced"
             {
                 v2f o;
                 const Lemming lemming = _LemmingsBuffer[instanceID];
-                const float S = length(lemming.Velocity);
-                const float2 V = normalize(lemming.Velocity);
-                //v.vertex.y += 0.5;
-                //v.vertex.x *= (1 - v.vertex.y);
-                //v.vertex.y *= S * unity_DeltaTime.x;
-                v.vertex.x *= 0.01;
-                v.vertex.y *= 0.02;
-                //   v.vertex.xy = mul(Rot(atan2(V.x,V.y)), v.vertex.xy);
+                v.vertex.xy *= _lemmingSize;
                 v.vertex.xyz += float3(lemming.Position, 0);
 
                 o.uv = computeUV(v.vertex);

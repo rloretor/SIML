@@ -1,6 +1,7 @@
 ////VARIABLES
 
-cbuffer once {float2 _texDimensions;float2 _MaxBound; float2 _MinBound; float _DeltaTime; uint _Instances;};
+cbuffer once {float2 _texDimensions;float2 _MaxBound; float2 _MinBound; float _DeltaTime; uint
+_Instances;float2 _lemmingSize;};
 #define WorldSize (_MaxBound - _MinBound)
 
 struct Lemming
@@ -14,6 +15,16 @@ struct rect
 {
     float2 Position;
     float2 Size;
+
+    float2 min()
+    {
+        Position - Size / 2.0f;
+    }
+
+    float2 max()
+    {
+        Position + Size / 2.0f;
+    }
 };
 
 
@@ -59,6 +70,47 @@ float Ray2Ray(float2 a, float2 ad, float2 b, float2 bd)
     return (dy * bd.x - dx * bd.y) / ((bd.x * ad.y) - (bd.y * ad.x));
 }
 
+/*
+bool Ray2Rect(rect b, float2 p0, float2 d, out double t, out float2 n)
+{
+    double2 dinv = 1 / d;
+    double t1 = (b.min()[0] - p0[0]) * dinv[0];
+    double t2 = (b.max()[0] - p0[0]) * dinv[0];
+
+    double tmin = min(t1, t2);
+    double tmax = max(t1, t2);
+
+    for (int i = 1; i < 2; ++i)
+    {
+        t1 = (b.min()[i] - p0[i]) * dinv[i];
+        t2 = (b.max()[i] - p0[i]) * dinv[i];
+
+        tmin = max(tmin, min(min(t1, t2), tmax));
+        tmax = min(tmax, max(max(t1, t2), tmin));
+    }
+
+    t = tmin;
+    if (tmax > max(tmin, 0.0))
+    {
+        float2 pfinal = p0 + d * (float)t;
+        n = (pfinal - b.Position);
+        if (pfinal.x > b.min().x && pfinal.x < b.max().x)
+        {
+            n = float2(0, 1) * sign(n.y);
+        }
+        else
+        {
+            n = float2(1, 0) * sign(n.x);
+            n = n.yx;
+        }
+
+        return true;
+    }
+
+    n = 0.0;
+    return false;
+}
+*/
 bool Ray2Rect(rect r, float2 p0, float2 D, out float t, out float2 n)
 {
     #define _d  float2(1, 0)

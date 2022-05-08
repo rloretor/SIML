@@ -7,7 +7,8 @@ namespace Lemmings
     [Serializable]
     public class LemmingRenderingModel
     {
-        public Mesh LemmingMesh;
+        public Mesh LemmingTemplateMesh;
+        public Transform lemmingTemplate;
         public Shader LemmingInstancedShader;
         public Material LemmingMaterial { get; private set; } = null;
 
@@ -26,9 +27,9 @@ namespace Lemmings
             if (controller != null)
             {
                 LemmingMaterial.SetTexture(SharedVariablesModel.collisionBitMap, controller.TerrainBitRT);
-
                 LemmingMaterial.SetVector(SharedVariablesModel.MinBound, sceneModel.bounds.BotLeft());
                 LemmingMaterial.SetVector(SharedVariablesModel.MaxBound, sceneModel.bounds.TopRight());
+                LemmingMaterial.SetVector(SharedVariablesModel.LemmingSize, lemmingTemplate.localScale);
             }
         }
 

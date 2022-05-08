@@ -1,5 +1,4 @@
 using Lemmings.Shared;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -34,7 +33,7 @@ namespace Lemmings
             sceneModel.Init(SceneModel.SceneBitMap.width, SceneModel.SceneBitMap.height);
 
             terrainController.Init(SceneModel, TerrainSimulationView);
-            terrainDebugController.Init(terrainController, RenderingModel.LemmingMesh, SimulationModel.Bounds);
+            terrainDebugController.Init(terrainController, RenderingModel.LemmingTemplateMesh, SimulationModel.Bounds);
         }
 
         private void SetCanvas()
@@ -75,6 +74,7 @@ namespace Lemmings
             SimulationModel.SimulationShader.SetVector(SharedVariablesModel.TexDimensions, new Vector2(terrainController.TerrainAnalysis.width, terrainController.TerrainAnalysis.height));
             SimulationModel.SimulationShader.SetFloat(SharedVariablesModel.DeltaTime, Time.deltaTime);
             SimulationModel.SimulationShader.SetVector("mousePos", Camera.main.ScreenToWorldPoint(Input.mousePosition));
+            SimulationModel.SimulationShader.SetVector(SharedVariablesModel.LemmingSize, RenderingModel.lemmingTemplate.localScale);
             SimulationModel.SimulationShader.SetTexture(SimulationModel.ComputeKernel, SharedVariablesModel.collisionBitMap, terrainController.TerrainBitRT);
             SimulationModel.SimulationShader.SetTexture(SimulationModel.ComputeKernel, SharedVariablesModel.terrainAnalysisTexture, terrainController.TerrainAnalysis);
         }
@@ -86,7 +86,7 @@ namespace Lemmings
 
         private void Draw()
         {
-            Graphics.DrawMeshInstancedProcedural(RenderingModel.LemmingMesh, 0, RenderingModel.LemmingMaterial,
+            Graphics.DrawMeshInstancedProcedural(RenderingModel.LemmingTemplateMesh, 0, RenderingModel.LemmingMaterial,
                 SimulationModel.Bounds.GetBounds(), SimulationModel.LemmingInstances, null, ShadowCastingMode.Off,
                 false);
         }

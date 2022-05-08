@@ -10,6 +10,7 @@ namespace Lemmings.Shared
         public static int DeltaTime = Shader.PropertyToID("_DeltaTime");
         public static int Instances = Shader.PropertyToID("_Instances");
         public static int collisionBitMap = Shader.PropertyToID("_collisionBitMap");
+        public static int LemmingSize = Shader.PropertyToID("_lemmingSize");
         public static int terrainAnalysisTexture = Shader.PropertyToID("_terrainAnalysisTexture");
     }
 }

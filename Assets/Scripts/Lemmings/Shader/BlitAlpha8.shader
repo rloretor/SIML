@@ -42,7 +42,7 @@
 
             float frag(v2f i) : SV_Target
             {
-                return ((int)tex2D(_MainTex, i.uv).a) == bitOnValue;
+                return floor(tex2D(_MainTex, i.uv).a) == bitOnValue;
             }
             ENDCG
         }

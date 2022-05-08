@@ -163,10 +163,10 @@ MonoBehaviour:
     rectSize: {x: 0.5, y: 0}
     Origin: {x: 5, y: 0}
     Direction: {x: 1, y: 0}
-  - Center: {x: 9, y: -1}
-    rectSize: {x: 2, y: 2}
-    Origin: {x: 7, y: -1}
-    Direction: {x: 1, y: 1}
+  - Center: {x: 9.26, y: -1}
+    rectSize: {x: 3.77, y: 2}
+    Origin: {x: 9.18, y: -1.75}
+    Direction: {x: 0.64, y: -0.72}
   testsPerLine: 4
   separationPerLine: 5
 --- !u!4 &145248377

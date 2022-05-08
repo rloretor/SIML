@@ -1,5 +1,6 @@
 using System;
 using Unity.Mathematics;
+using UnityEngine;
 
 namespace Test
 {
@@ -7,6 +8,9 @@ namespace Test
     {
         float max(float a, float b) => math.max(a, b);
         float min(float a, float b) => math.min(a, b);
+
+        double max(double a, double b) => math.max(a, b);
+        double min(double a, double b) => math.min(a, b);
 
         public struct Rect
         {
@@ -18,6 +22,37 @@ namespace Test
 
             public float2 Position;
             public float2 Size;
+
+            public Vector3 V3Pos()
+            {
+                return new Vector3(Position.x, Position.y, 1);
+            }
+
+            public Vector3 V3Size()
+            {
+                return new Vector3(Size.x, Size.y, 1);
+            }
+
+            public float2 min()
+            {
+                return Position - Size / 2.0f;
+            }
+
+            public float2 max()
+            {
+                return Position + Size / 2.0f;
+            }
+
+            public void DebugDrawPixel(Color c)
+            {
+                var p = V3Pos();
+                var s = V3Size() / 2.0f;
+
+                Debug.DrawLine(p + s, p + Vector3.right * s.x - Vector3.up * s.y, c);
+                Debug.DrawLine(p + Vector3.right * s.x - Vector3.up * s.y, p - s, c);
+                Debug.DrawLine(p - s, p - Vector3.right * s.x + Vector3.up * s.y, c);
+                Debug.DrawLine(p - Vector3.right * s.x + Vector3.up * s.y, p + s, c);
+            }
         };
 
         public float Ray2Ray(float2 a, float2 ad, float2 b, float2 bd)
@@ -25,6 +60,47 @@ namespace Test
             float dx = (b.x - a.x);
             float dy = (b.y - a.y);
             return (dy * bd.x - dx * bd.y) / ((bd.x * ad.y) - (bd.y * ad.x));
+        }
+
+        public bool Ray2Rect(Rect b, float2 p0, float2 d, out double t, out float2 n)
+        {
+            double2 dinv = 1 / d;
+            double t1 = (b.min()[0] - p0[0]) * dinv[0];
+            double t2 = (b.max()[0] - p0[0]) * dinv[0];
+
+            double tmin = min(t1, t2);
+            double tmax = max(t1, t2);
+
+            for (int i = 1; i < 2; ++i)
+            {
+                t1 = (b.min()[i] - p0[i]) * dinv[i];
+                t2 = (b.max()[i] - p0[i]) * dinv[i];
+
+                tmin = max(tmin, min(min(t1, t2), tmax));
+                tmax = min(tmax, max(max(t1, t2), tmin));
+            }
+
+            t = tmin;
+            if (tmax > max(tmin, 0.0))
+            {
+                float2 pfinal = p0 + d * (float) t;
+                n = (pfinal - b.Position);
+                Debug.DrawLine(p0.ToVector2(), pfinal.ToVector2());
+                if (pfinal.x > b.min().x && pfinal.x < b.max().x)
+                {
+                    n = new float2(0, 1) * math.sign(n.y);
+                }
+                else
+                {
+                    n = new float2(1, 0) * math.sign(n.x);
+                    n = n.yx;
+                }
+
+                return true;
+            }
+
+            n = float2.zero;
+            return false;
         }
 
         public bool Ray2Rect(Rect r, float2 p0, float2 D, out float t, out float2 n)
@@ -53,12 +129,21 @@ namespace Test
                 else
                 {
                     n = new float2(1, 0) * math.sign(n.x);
+                    n = n.yx;
                 }
 
                 return true;
             }
 
             return false;
+        }
+    }
+
+    public static class float2Extensions
+    {
+        public static Vector2 ToVector2(this float2 v)
+        {
+            return new Vector2(v.x, v.y);
         }
     }
 }
