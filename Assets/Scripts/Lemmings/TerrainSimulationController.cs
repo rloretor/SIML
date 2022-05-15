@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 
@@ -20,12 +19,14 @@ namespace Lemmings
         private JumpFloodAlgorithmBase<RenderTexture> JFAController;
 
         private bool needsTerrainUpdate = false;
+        private Bounds bounds;
 
-        public void Init(SceneModel sceneModel, TerrainSimulationView view)
+        public void Init(SceneModel sceneModel, TerrainSimulationView view, Bounds simulationModelBounds)
         {
             Init(sceneModel);
             view.TerrainBitmapViewer.texture = TerrainBitRT;
             view.JFAResultViewer.texture = TerrainAnalysis;
+            this.bounds = simulationModelBounds;
         }
 
         public void Init(SceneModel sceneModel)
@@ -39,7 +40,7 @@ namespace Lemmings
                 FillRenderTextures(i);
             }
 
-            ApplyBlur(TerrainAnalysis, TerrainAnalysis);
+            //ApplyBlur(TerrainAnalysis, TerrainAnalysis);
 
             needsTerrainUpdate = true;
             UpdateTerrain();

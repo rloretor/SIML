@@ -5,7 +5,7 @@
 RWStructuredBuffer<Lemming> _Lemmings;
 Texture2D _collisionBitMap;
 Texture2D _terrainAnalysisTexture;
-SamplerState _linearClampSampler;
+SamplerState _point_clamp_Sampler;
 
 bool _Simulate;
 #define Gravity  4.9
@@ -22,26 +22,25 @@ rect GetLemmingCollision(float2 p)
 {
     float2 s = _lemmingSize;
     float2 d = float2(1, 0);
-    const float2 corners[6] =
+    const float2 corners[5] =
     {
         float2(p - s),
         float2(p + d.xy * s.x - d.yx * s.y),
-        float2(p - d.xy * s.x - d.yx * s.y),
         float2(p - d.yx * s),
-        float2(p + d.xy * s),
-        float2(p - d.xy * s),
+        float2(p + d.xy * s.x),
+        float2(p - d.xy * s.x),
     };
     const float2 pixelSize = WorldSize / _texDimensions;
 
     float2 maxS = -1000.0;
     float2 minS = 1000.0;
     float2 puv;
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < 5; i++)
     {
         puv = computeUV(corners[i]);
         float2 pixelPos = computePos(computePixelUV(puv, 0.5));
 
-        if (_collisionBitMap.SampleLevel(_linearClampSampler, puv, 0).x == 0.0)
+        if (_collisionBitMap.SampleLevel(_point_clamp_Sampler, puv, 0).x == 0.0)
         {
             maxS = max(maxS, pixelPos + pixelSize / 2);
             minS = min(minS, pixelPos - pixelSize / 2);
@@ -82,10 +81,13 @@ void LemmingsMovementPassKernel(uint3 id : SV_DispatchThreadID)
     {
         Lemming lemming = _Lemmings[id.x];
         float2 uv = computeUV(lemming.Position + lemming.Velocity * _DeltaTime);
-        rect pixel = GetLemmingCollision(lemming.Position);
+        rect pixel = GetLemmingCollision(lemming.Position + lemming.Velocity * _DeltaTime);
         bool2 collides = pixel.Size != (-2000.0); // maybe
         if (collides.x || collides.y)
         {
+            float3 sizeExtra = _terrainAnalysisTexture.SampleLevel(_point_clamp_Sampler, computePixelUV(uv, 0.5), 0);
+            sizeExtra.xy *= sizeExtra.z * WorldSize * 2;
+            //pixel.Size = max(pixel.Size, sizeExtra.xy);
             pixel.Size += _lemmingSize / 2.0f;
             FixCollision(lemming, pixel);
         }

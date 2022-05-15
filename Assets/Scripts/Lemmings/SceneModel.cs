@@ -24,6 +24,7 @@ namespace Lemmings
         private RenderTexture sceneBitMap;
 
         public override Texture SceneBitMap => sceneBitMap;
+        public RenderTexture SceneBitMapRT => sceneBitMap;
 
 
         public override void Init(int width, int height)

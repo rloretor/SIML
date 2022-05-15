@@ -1,22 +1,20 @@
-using System;
 using System.Collections.Generic;
 using Lemmings.Shared;
 using Test;
 using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 using Color = UnityEngine.Color;
+using Vector2 = UnityEngine.Vector2;
 
 namespace Lemmings
 {
     public class LemmingSimulationCPUController : MonoBehaviour
     {
         public Canvas Canvas;
-        public RawImage Background;
         public LemmingSimulationModel SimulationModel;
         public GameObject lemmingTemplate;
+
         public bool DEBUG;
         private List<GameObject> LemmingRepresentation;
 
@@ -32,27 +30,34 @@ namespace Lemmings
 
         public void OnDrawGizmos()
         {
-            // if (EditorApplication.isPlaying)
-            // {
-            //     Gizmos.DrawWireCube((SimulationModel.Bounds.TopRight() + MinBound()) / 2.0f, SimulationModel.Bounds.TopRight() - SimulationModel.Bounds.BotLeft());
-            //     Vector2 pixelSize = (SimulationModel.Bounds.TopRight() - SimulationModel.Bounds.BotLeft()) / new Vector2(SDF.width, SDF.height);
-            //     for (int i = 0; i < Collision.width; i++)
-            //     {
-            //         for (int j = 0; j < Collision.height; j++)
-            //         {
-            //             var vector2 = new Vector2(i, j);
-            //             Vector2 pos = (MinBound() + (vector2 + Vector2.one * 0.5f) * pixelSize);
-            //             Gizmos.color = Color.white * (1.0f - Collision.GetPixel(i, j).r);
+            Vector2 topRight = SimulationModel.TopRight;
+            Vector2 botLeft = SimulationModel.BotLeft;
+            Gizmos.DrawLine(topRight, botLeft);
+            if (EditorApplication.isPlaying)
+            {
+                //Gizmos.DrawWireCube((topRight + botLeft) / 2.0f, topRight - botLeft);
+                Vector2 pixelSize = (topRight - botLeft) / new Vector2(SDF.width, SDF.height);
+                for (int i = 0; i < Collision.width; i++)
+                {
+                    for (int j = 0; j < Collision.height; j++)
+                    {
+                        var vector2 = new Vector2(i, j);
+                        Vector2 pos = (botLeft + (vector2 + Vector2.one * 0.5f) * pixelSize);
 
-            //             Gizmos.DrawWireCube(pos, pixelSize);
-            //         }
-            //     }
-            // }
-        }
+                        var pixelUV = computePixelUV(computeUV(pos), 0.5f);
+                        var SDFColor = SDF.GetPixelFromUV(pixelUV);
+                        float2 sdf = math.normalize(new float2(SDFColor.r, SDFColor.g)) * SDFColor.b;
+                        sdf *= (float2) (topRight - botLeft);
 
-        private Vector2 MinBound()
-        {
-            return SimulationModel.Bounds.BotLeft();
+                        if (Collision.GetPixelFromUV(pixelUV).r == 0)
+                        {
+                            Gizmos.DrawWireCube(pos, pixelSize);
+                            Gizmos.DrawWireCube(pos, pixelSize / 10.0f);
+                            Gizmos.DrawLine(pos, pos + (Vector2) sdf);
+                        }
+                    }
+                }
+            }
         }
 
         private void Start()
@@ -70,17 +75,17 @@ namespace Lemmings
 
         float2 computeUV(float2 position)
         {
-            SimulationModel.SimulationShader.SetVector(SharedVariablesModel.MaxBound, SimulationModel.Bounds.TopRight());
-            float2 botLeft = SimulationModel.Bounds.BotLeft();
-            float2 topRight = SimulationModel.Bounds.TopRight();
+            SimulationModel.SimulationShader.SetVector(SharedVariablesModel.MaxBound, SimulationModel.TopRight);
+            float2 botLeft = SimulationModel.BotLeft;
+            float2 topRight = SimulationModel.TopRight;
 
             return (position - botLeft) / (topRight - botLeft);
         }
 
         float2 computePos(float2 uv)
         {
-            float2 botLeft = SimulationModel.Bounds.BotLeft();
-            float2 topRight = SimulationModel.Bounds.TopRight();
+            float2 botLeft = SimulationModel.BotLeft;
+            float2 topRight = SimulationModel.TopRight;
             return ((uv * (topRight - botLeft)) + botLeft);
         }
 
@@ -108,11 +113,11 @@ namespace Lemmings
                 p + d.xy * s,
                 p - d.xy * s,
             };
-            Debug.DrawLine(new Vector3(p.x, p.y, 0), corners[0]);
-            Debug.DrawLine(new Vector3(p.x, p.y, 0), corners[1]);
-            Debug.DrawLine(new Vector3(p.x, p.y, 0), corners[2]);
-            Debug.DrawLine(new Vector3(p.x, p.y, 0), corners[3]);
-            Vector2 pixelSize = (SimulationModel.Bounds.TopRight() - SimulationModel.Bounds.BotLeft()) / new Vector2(SDF.width, SDF.height);
+            //Debug.DrawLine(new Vector3(p.x, p.y, 0), corners[0]);
+            //Debug.DrawLine(new Vector3(p.x, p.y, 0), corners[1]);
+            //Debug.DrawLine(new Vector3(p.x, p.y, 0), corners[2]);
+            //Debug.DrawLine(new Vector3(p.x, p.y, 0), corners[3]);
+            Vector2 pixelSize = (SimulationModel.TopRight - SimulationModel.BotLeft) / new Vector2(SDF.width, SDF.height);
 
             Vector2 max = Vector2.one * -1000f;
             Vector2 min = Vector2.one * 1000f;
@@ -138,7 +143,7 @@ namespace Lemmings
             }
 
             LemmingsShaderMathUtil.Rect collisionPixel = new LemmingsShaderMathUtil.Rect();
-            Debug.DrawLine(min, max);
+            // Debug.DrawLine(min, max);
             collisionPixel.Position = (max + min) / 2.0f;
             collisionPixel.Size = (max - min);
             return collisionPixel;
@@ -151,7 +156,7 @@ namespace Lemmings
 
             var SDFColor = SDF.GetPixelFromUV(puv);
             float2 sdf = math.normalize(new float2(SDFColor.r, SDFColor.g)) * SDFColor.b;
-            sdf = sdf * (float2) (SimulationModel.Bounds.TopRight() - SimulationModel.Bounds.BotLeft());
+            sdf = sdf * (float2) (SimulationModel.TopRight - SimulationModel.BotLeft);
             LemmingsShaderMathUtil.Rect sdfRect;
             sdfRect.Position = r.Position;
             sdfRect.Size = sdf * 2;
@@ -219,7 +224,7 @@ namespace Lemmings
             }
 
             lemming.Position = lemming.Position + lemming.Velocity * Time.deltaTime;
-            Debug.DrawLine(lemming.Position, lemming.Position + lemming.Velocity, Color.magenta);
+            //  Debug.DrawLine(lemming.Position, lemming.Position + lemming.Velocity, Color.magenta);
         }
 
         void FixCollision(ref LemmingKinematicModel lemming, float2 uv)
@@ -231,12 +236,12 @@ namespace Lemmings
             // Color32 sdfcolor = SDF.GetPixel(Mathf.RoundToInt(uv.x * SDF.width), Mathf.RoundToInt(uv.y * SDF.height), 0);
 
 
-            pixel.Size = (SimulationModel.Bounds.TopRight() - SimulationModel.Bounds.BotLeft()) / new Vector2(SDF.width, SDF.height);
+            pixel.Size = (SimulationModel.TopRight - SimulationModel.BotLeft) / new Vector2(SDF.width, SDF.height);
             pixel.Size += new float2(lemmingTemplate.transform.localScale.x, lemmingTemplate.transform.localScale.y) / 2.0f;
             pixel.DebugDrawPixel(Color.cyan);
             float t = 0;
             float2 n = 0;
-            Debug.DrawLine(lemming.Position, pixel.V3Pos());
+            //    Debug.DrawLine(lemming.Position, pixel.V3Pos());
             bool c = util.Ray2Rect(pixel, lemming.Position, lemming.Velocity * Time.deltaTime, out t, out n);
             if (c)
             {
@@ -260,15 +265,14 @@ namespace Lemmings
             lemming.Velocity.x = posUV.x <= 0 ? -lemming.Velocity.x : lemming.Velocity.x;
             lemming.Velocity.y = posUV.y <= 0 ? 0 : lemming.Velocity.y;
             float2 pos = lemming.Position;
-            pos.x = Mathf.Clamp(lemming.Position.x, SimulationModel.Bounds.BotLeft().x, SimulationModel.Bounds.TopRight().x);
-            pos.y = Mathf.Clamp(lemming.Position.y, SimulationModel.Bounds.BotLeft().y, SimulationModel.Bounds.TopRight().y);
+            pos.x = Mathf.Clamp(lemming.Position.x, SimulationModel.BotLeft.x, SimulationModel.TopRight.x);
+            pos.y = Mathf.Clamp(lemming.Position.y, SimulationModel.BotLeft.y, SimulationModel.TopRight.y);
             lemming.Position = pos;
         }
 
 
         private void PrepareLemmings()
         {
-            SimulationModel.Init();
             LemmingRepresentation = new List<GameObject>();
             for (int i = 0; i < SimulationModel.LemmingInstances; i++)
             {
@@ -290,15 +294,12 @@ namespace Lemmings
             terrainDebugController = new TerrainVectorDebugController();
             SceneModel sceneModel = new SDFSceneModel();
             sceneModel.Init(SceneModel.SceneBitMap.width, SceneModel.SceneBitMap.height);
-
-            terrainController.Init(SceneModel, TerrainSimulationView);
+            SimulationModel.Init();
+            terrainController.Init(SceneModel, TerrainSimulationView, SimulationModel.Bounds);
             //terrainDebugController.Init(terrainController, RenderingModel.LemmingMesh, SimulationModel.Bounds);
 
             Collision = terrainController.TerrainBitRT.toTexture2D();
-
-
             SDF = terrainController.TerrainAnalysis.toTexture2D(terrainController.TerrainAnalysis.graphicsFormat);
-            this.Background.texture = SDF;
         }
     }
 }

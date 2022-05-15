@@ -32,8 +32,8 @@
             float4 _MainTex_TexelSize;
             int isNegative = 1;
             #define T(uv) tex2Dlod(_MainTex,float4(uv,0,0))
-            #define cell(uv) tex2D(_MainTex, uv).xyz
-            #define D(uv) (sign(isNegative) *length(cell(uv).xy-uv)/2.0)
+            #define cell(uv) T( uv).xyz
+            #define D(uv) (sign(isNegative) *length(cell(uv).xy-uv) )
 
             float2 Central_Diff(float2 uv)
             {

@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Numerics;
 using System.Runtime.InteropServices;
 using UnityEngine;
-using Random = System.Random;
 using Vector2 = UnityEngine.Vector2;
 
 namespace Lemmings
@@ -13,9 +11,15 @@ namespace Lemmings
     {
         public int ThreadGroupSize { get; private set; }
         public ComputeShader SimulationShader;
-        public RectTransform Bounds;
+        [SerializeField] private Transform topRight;
+        [SerializeField] private Transform botLeft;
         public Transform[] SpawnPoints;
         public int LemmingInstances;
+
+        [HideInInspector] public Bounds Bounds;
+
+        public Vector2 TopRight => topRight.position;
+        public Vector2 BotLeft => botLeft.position;
 
         private const int GroupSize = 512;
 
@@ -26,6 +30,7 @@ namespace Lemmings
 
         public void Init()
         {
+            Bounds = new Bounds((BotLeft + TopRight) * 0.5f, TopRight - BotLeft);
             ThreadGroupSize = Mathf.CeilToInt((float) LemmingInstances / GroupSize);
             PopulateModel();
             CreateComputeBuffer();

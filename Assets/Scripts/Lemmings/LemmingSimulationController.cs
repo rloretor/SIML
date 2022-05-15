@@ -32,8 +32,8 @@ namespace Lemmings
             SceneModel sceneModel = new SDFSceneModel();
             sceneModel.Init(SceneModel.SceneBitMap.width, SceneModel.SceneBitMap.height);
 
-            terrainController.Init(SceneModel, TerrainSimulationView);
-            terrainDebugController.Init(terrainController, RenderingModel.LemmingTemplateMesh, SimulationModel.Bounds);
+            terrainController.Init(SceneModel, TerrainSimulationView, SimulationModel.Bounds);
+            terrainDebugController.Init(terrainController, RenderingModel.LemmingTemplateMesh, SimulationModel.TopRight, SimulationModel.BotLeft);
         }
 
         private void SetCanvas()
@@ -69,8 +69,8 @@ namespace Lemmings
         private void UpdateComputeShader()
         {
             SimulationModel.SimulationShader.SetBool("_Simulate", this.simulate);
-            SimulationModel.SimulationShader.SetVector(SharedVariablesModel.MaxBound, SimulationModel.Bounds.TopRight());
-            SimulationModel.SimulationShader.SetVector(SharedVariablesModel.MinBound, SimulationModel.Bounds.BotLeft());
+            SimulationModel.SimulationShader.SetVector(SharedVariablesModel.MaxBound, SimulationModel.TopRight);
+            SimulationModel.SimulationShader.SetVector(SharedVariablesModel.MinBound, SimulationModel.BotLeft);
             SimulationModel.SimulationShader.SetVector(SharedVariablesModel.TexDimensions, new Vector2(terrainController.TerrainAnalysis.width, terrainController.TerrainAnalysis.height));
             SimulationModel.SimulationShader.SetFloat(SharedVariablesModel.DeltaTime, Time.deltaTime);
             SimulationModel.SimulationShader.SetVector("mousePos", Camera.main.ScreenToWorldPoint(Input.mousePosition));
@@ -87,7 +87,7 @@ namespace Lemmings
         private void Draw()
         {
             Graphics.DrawMeshInstancedProcedural(RenderingModel.LemmingTemplateMesh, 0, RenderingModel.LemmingMaterial,
-                SimulationModel.Bounds.GetBounds(), SimulationModel.LemmingInstances, null, ShadowCastingMode.Off,
+                SimulationModel.Bounds, SimulationModel.LemmingInstances, null, ShadowCastingMode.Off,
                 false);
         }
 
