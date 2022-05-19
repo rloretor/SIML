@@ -1,6 +1,11 @@
 using System;
+using System.Drawing;
+using System.Net.Sockets;
+using Lemmings;
 using Unity.Mathematics;
 using UnityEngine;
+using Color = UnityEngine.Color;
+using Random = System.Random;
 
 namespace Test
 {
@@ -11,6 +16,12 @@ namespace Test
 
         double max(double a, double b) => math.max(a, b);
         double min(double a, double b) => math.min(a, b);
+
+        //projection b over a
+        public static float2 project(float2 b, float2 a)
+        {
+            return (math.dot(a, b) / math.dot(a, a)) * a;
+        }
 
         public struct Rect
         {
@@ -136,6 +147,70 @@ namespace Test
             }
 
             return false;
+        }
+
+        public static float2 computeUV(float2 position, float2 botLeft, float2 topRight)
+        {
+            return (position - botLeft) / (topRight - botLeft);
+        }
+
+        public static float2 computePos(float2 uv, float2 botLeft, float2 topRight)
+        {
+            return ((uv * (topRight - botLeft)) + botLeft);
+        }
+
+        public static float2 computePixelUV(float2 uv, float2 d, float width, float height)
+        {
+            float2 puv = uv;
+            float2 _texDimensions = new float2(width, height);
+            puv.x = (Mathf.Floor(uv.x * _texDimensions.x) + d.x) / _texDimensions.x;
+            puv.y = (Mathf.Floor(uv.y * _texDimensions.y) + d.y) / _texDimensions.y;
+            return puv;
+        }
+
+        public static float2 computePixel(float2 uv, float width, float height)
+        {
+            return uv * new float2(width, height);
+        }
+
+        public static float2 GetCardinalDirection(float2 p, float vy, float2 min, float2 max)
+        {
+            float2 nPos = math.clamp(p, min, max);
+            nPos = (nPos - min) / (max - min);
+            nPos = nPos * 2.0f - 1.0f;
+
+            nPos = math.normalize(nPos);
+            float2 absnv = math.abs(nPos);
+            float m = math.cmin(absnv);
+            float2 s = math.sign(nPos) * math.ceil(absnv - m);
+            if (s.x == s.y)
+            {
+                s = new float2(0, 1) * -math.sign(vy + 0.0001f);
+            }
+
+            return s;
+        }
+
+        public static void FixCollision(float2 position, float2 prevPos, Rect pixel, float2 lemmingSize, ref LemmingKinematicModel lemming)
+        {
+            float2 sign = GetCardinalDirection(prevPos, lemming.Velocity.y, pixel.Position - pixel.Size * 0.5f, pixel.Position + pixel.Size * 0.5f);
+
+            var proj = project((position - pixel.Position), sign.yx);
+            // proj = UnityEngine.Random.Range(1.02f, 1.3f) * proj;
+            float2 displacement = proj + sign * (pixel.Size * 0.5f + lemmingSize * 0.5f);
+
+            float2 lemmingPosition = pixel.Position + displacement;
+            displacement = lemmingPosition - (float2) prevPos;
+            // Debug.DrawLine(prevPos.ToVector2(), lemmingPosition.ToVector2());
+            lemming.Position = lemmingPosition;
+            //todo fix projected space]
+            float L = math.length(lemming.Velocity);
+            lemming.Velocity += (Vector2) math.abs(sign.yx * 0.01f);
+
+            lemming.Velocity = math.normalize(math.abs(sign.yx)) * (float2) lemming.Velocity;
+            //  lemming.Velocity.y *= 0.1f;
+            lemming.Velocity = math.normalize(lemming.Velocity) * math.clamp(L, 0, lemmingSize.x * 2);
+            Debug.DrawLine(lemming.Position, lemming.Position + lemming.Velocity);
         }
     }
 

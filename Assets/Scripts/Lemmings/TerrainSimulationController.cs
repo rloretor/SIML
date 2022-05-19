@@ -40,7 +40,7 @@ namespace Lemmings
                 FillRenderTextures(i);
             }
 
-            //ApplyBlur(TerrainAnalysis, TerrainAnalysis);
+            // ApplyBlur(TerrainAnalysis, TerrainAnalysis);
 
             needsTerrainUpdate = true;
             UpdateTerrain();
@@ -131,7 +131,7 @@ namespace Lemmings
             int rtH = source.height;
 
             RenderTexture bufferRenderTexture = RenderTexture.GetTemporary(rtW, rtH, 0, targetTexture.format);
-            bufferRenderTexture.filterMode = FilterMode.Bilinear;
+            bufferRenderTexture.filterMode = FilterMode.Point;
             bufferRenderTexture.wrapMode = TextureWrapMode.Clamp;
             Graphics.Blit(source, bufferRenderTexture, BlurMat, 0);
 
