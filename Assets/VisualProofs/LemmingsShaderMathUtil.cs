@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Net.Sockets;
 using Lemmings;
 using Unity.Mathematics;
+using UnityEditor;
 using UnityEngine;
 using Color = UnityEngine.Color;
 using Random = System.Random;
@@ -168,16 +169,24 @@ namespace Test
             return puv;
         }
 
+        public static float2 pointInSquarePerimeter(float2 p, float2 v, float2 min, float2 max)
+        {
+            float2 nPos = math.clamp(p + v, min, max);
+            nPos = (nPos - min) / (max - min);
+            return (nPos * 2.0f - 1.0f) * (max - min) / 2;
+        }
+
         public static float2 computePixel(float2 uv, float width, float height)
         {
             return uv * new float2(width, height);
         }
 
-        public static float2 GetCardinalDirection(float2 p, float vy, float2 min, float2 max)
+        public static float2 GetCardinalDirection(float2 p, float2 v, float2 min, float2 max)
         {
             float2 nPos = math.clamp(p, min, max);
             nPos = (nPos - min) / (max - min);
             nPos = nPos * 2.0f - 1.0f;
+            //float2 nPos = pointInSquarePerimeter(p, v, min, max);
 
             nPos = math.normalize(nPos);
             float2 absnv = math.abs(nPos);
@@ -185,7 +194,7 @@ namespace Test
             float2 s = math.sign(nPos) * math.ceil(absnv - m);
             if (s.x == s.y)
             {
-                s = new float2(0, 1) * -math.sign(vy + 0.0001f);
+                s = new float2(0, 1) * -math.sign(v.y + 0.0001f);
             }
 
             return s;
@@ -193,16 +202,13 @@ namespace Test
 
         public static void FixCollision(float2 position, float2 prevPos, Rect pixel, float2 lemmingSize, ref LemmingKinematicModel lemming)
         {
-            float2 sign = GetCardinalDirection(prevPos, lemming.Velocity.y, pixel.Position - pixel.Size * 0.5f, pixel.Position + pixel.Size * 0.5f);
+            float2 sign = GetCardinalDirection(prevPos, lemming.Velocity, pixel.Position - pixel.Size * 0.5f, pixel.Position + pixel.Size * 0.5f);
 
             var proj = project((position - pixel.Position), sign.yx);
             // proj = UnityEngine.Random.Range(1.02f, 1.3f) * proj;
             float2 displacement = proj + sign * (pixel.Size * 0.5f + lemmingSize * 0.5f);
 
-            float2 lemmingPosition = pixel.Position + displacement;
-            displacement = lemmingPosition - (float2) prevPos;
-            // Debug.DrawLine(prevPos.ToVector2(), lemmingPosition.ToVector2());
-            lemming.Position = lemmingPosition;
+            lemming.Position = pixel.Position + displacement;
             //todo fix projected space]
             float L = math.length(lemming.Velocity);
             lemming.Velocity += (Vector2) math.abs(sign.yx * 0.01f);
@@ -210,7 +216,6 @@ namespace Test
             lemming.Velocity = math.normalize(math.abs(sign.yx)) * (float2) lemming.Velocity;
             //  lemming.Velocity.y *= 0.1f;
             lemming.Velocity = math.normalize(lemming.Velocity) * math.clamp(L, 0, lemmingSize.x * 2);
-            Debug.DrawLine(lemming.Position, lemming.Position + lemming.Velocity);
         }
     }
 

@@ -106,25 +106,19 @@ namespace Lemmings
         }
 
 
-        LemmingsShaderMathUtil.Rect GetLemmingCollision(float2 p)
+        LemmingsShaderMathUtil.Rect GetLemmingCollision(LemmingKinematicModel lemming)
         {
-            float2 s = new float2(lemmingTemplate.transform.localScale.x, lemmingTemplate.transform.localScale.y) / 2;
-            float2 d = new float2(1, 0);
-            Vector2[] corners = new Vector2[]
-            {
-                p + s,
-                p + d.xy * s.x - d.yx * s.y,
-                p - d.xy * s.x + d.yx * s.y,
-                p - s,
-                p + d.yx * s,
-                p - d.yx * s,
-                p + d.xy * s,
-                p - d.xy * s,
-            };
-            //Debug.DrawLine(new Vector3(p.x, p.y, 0), corners[0]);
-            //Debug.DrawLine(new Vector3(p.x, p.y, 0), corners[1]);
-            //Debug.DrawLine(new Vector3(p.x, p.y, 0), corners[2]);
-            //Debug.DrawLine(new Vector3(p.x, p.y, 0), corners[3]);
+            var transformLocalScale = lemmingTemplate.transform.localScale;
+            float2 s = new float2(transformLocalScale.x, transformLocalScale.y) / 2;
+            float2 p = (float2) (lemming.Position + lemming.Velocity * Time.deltaTime);
+
+            float2 c = LemmingsShaderMathUtil.pointInSquarePerimeter(lemming.Position, lemming.Velocity, (float2) lemming.Position - s, (float2) lemming.Position + s);
+            Debug.DrawLine(p.ToVector2(), p.ToVector2() + c.ToVector2());
+
+
+            float2[] corners = new[] {p + c, p + new float2(0, -s.y)};
+            Debug.DrawLine(p.ToVector2(), p.ToVector2() + c.ToVector2());
+
             Vector2 pixelSize = (SimulationModel.TopRight - SimulationModel.BotLeft) / new Vector2(SDF.width, SDF.height);
 
             Vector2 max = Vector2.one * -1000f;
@@ -203,26 +197,23 @@ namespace Lemmings
             {
                 LemmingRepresentation[index].transform.position = SimulationModel.lemmingList[index].Position;
                 var lemming = SimulationModel.lemmingList[index];
+
                 float2 p = lemming.Position + lemming.Velocity * Time.deltaTime;
-                var pixel = GetLemmingCollision(p);
+                var pixel = GetLemmingCollision(lemming);
                 bool2 collides = pixel.Size != (float2) (Vector2.one * -1000 - Vector2.one * 1000);
                 if (collides.x || collides.y)
                 {
-                    // pixel = AdaptColision(pixel);
                     pixel.DebugDrawPixel(Color.blue);
-                    // pixel.Size += new float2(lemmingTemplate.transform.localScale.x, lemmingTemplate.transform.localScale.y) / 2.0f;
-                    // pixel.DebugDrawPixel(Color.yellow);
                     LemmingsShaderMathUtil.FixCollision(p, lemming.Position, pixel, (float2) ((Vector2) lemmingTemplate.transform.localScale), ref lemming);
                     if (DEBUG)
                         Debug.Break();
                 }
-                else
-                {
-                    lemming.Acceleration = -new float2(0, Gravity);
-                    lemming.Velocity += lemming.Acceleration * Time.deltaTime;
-                    lemming.Position += lemming.Velocity * Time.deltaTime;
-                    lemming.Acceleration = float2.zero;
-                }
+
+                lemming.Acceleration = -new float2(0, Gravity);
+                lemming.Velocity += lemming.Acceleration * Time.deltaTime;
+                lemming.Position += lemming.Velocity * Time.deltaTime;
+                lemming.Acceleration = float2.zero;
+
 
                 //lemming.Position = this.SimulationModel.SpawnPoints[0].transform.position;
                 FixOutOfBounds(ref lemming, computeUV(lemming.Position));
