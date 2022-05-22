@@ -25,6 +25,8 @@ namespace Lemmings
         private Texture2D SDF;
         private Color[] CollisionColors;
         private Color[] SDFColors;
+        const float Gravity = 4.9f;
+
 
 /*
         public void OnDrawGizmos()
@@ -130,7 +132,6 @@ namespace Lemmings
 
         private void SimulateLemmings()
         {
-            float Gravity = 4.9f;
             for (var index = 0; index < SimulationModel.lemmingList.Count; index++)
             {
                 LemmingRepresentation[index].transform.position = SimulationModel.lemmingList[index].Position;
