@@ -18,7 +18,6 @@ namespace Lemmings
 
         [Header("Scene")] public BitMapSceneModel SceneModel;
         public TerrainSimulationView TerrainSimulationView;
-
         private TerrainSimulationController terrainController;
 
         private bool simulate = false;
@@ -74,7 +73,7 @@ namespace Lemmings
             PrepareLemmings();
         }
 
-        public void LateUpdate()
+        public void Update()
         {
             SimulateLemmings();
         }
@@ -92,32 +91,35 @@ namespace Lemmings
 
             Vector2 max = Vector2.one * -1000f;
             Vector2 min = Vector2.one * 1000f;
+
             float2 puv;
-
-            for (int i = 0; i < corners.Length; i++)
+            float2 psdf;
+            float2 sdfPixelUV;
+            float2 nsdf;
+            Vector2 pixelPos;
+            Color pixel;
+            foreach (var t in corners)
             {
-                puv = (computeUV(corners[i]));
+                puv = (ComputeUV(t));
 
-                Vector2 pixelPos = computePos(computePixelUV(puv, 0f));
-                Color pixel = Color.white * GetPixelFromUV(Collision, puv).r;
-                if (pixel.r == 0f)
-                {
-                    var sdfColor = GetPixelFromUV(SDF, puv);
-                    float2 nsdf = math.normalize(new float2(sdfColor.r, sdfColor.g));
-                    var sdfPixelUV = computePixel(computePixelUV(puv + nsdf * sdfColor.b, 0.5f)); //math.abs(nsdf * 0.5f + 0.5f)));
+                pixelPos = ComputePos(ComputePixelUV(puv, 0f));
+                pixel = Color.white * GetPixelFromUV(Collision, puv).r;
+                if (pixel.r != 0f) continue;
 
-                    sdfPixelUV /= new float2(terrainController.TerrainBitRT.width, terrainController.TerrainBitRT.height);
-                    float2 psdf = computePos(computePixelUV(sdfPixelUV, 0f));
+                var sdfColor = GetPixelFromUV(SDF, puv);
+                nsdf = math.normalize(new float2(sdfColor.r, sdfColor.g));
+                sdfPixelUV = ComputePixel(ComputePixelUV(puv + nsdf * sdfColor.b, 0.5f));
 
-                    max = Vector2.Max(max, Vector2.Max(pixelPos, psdf));
-                    min = Vector2.Min(min, Vector2.Min(pixelPos, psdf));
-                    psdf = math.max(max, min);
-                    min = math.min(max, min);
-                    max = psdf;
-                    max = Vector2.Max(max, pixelPos + pixelSize * 0.5f);
-                    min = Vector2.Min(min, pixelPos - pixelSize * 0.5f);
+                sdfPixelUV /= new float2(terrainController.TerrainBitRT.width, terrainController.TerrainBitRT.height);
+                psdf = ComputePos(ComputePixelUV(sdfPixelUV, 0f));
 
-                }
+                max = Vector2.Max(max, Vector2.Max(pixelPos, psdf));
+                min = Vector2.Min(min, Vector2.Min(pixelPos, psdf));
+                psdf = math.max(max, min);
+                min = math.min(max, min);
+                max = psdf;
+                max = Vector2.Max(max, pixelPos + pixelSize * 0.5f);
+                min = Vector2.Min(min, pixelPos - pixelSize * 0.5f);
             }
 
             LemmingsShaderMathUtil.Rect collisionPixel = new LemmingsShaderMathUtil.Rect();
@@ -139,7 +141,6 @@ namespace Lemmings
                 bool2 collides = pixel.Size != (float2) (Vector2.one * -1000 - Vector2.one * 1000);
                 if (collides.x || collides.y)
                 {
-                    pixel.DebugDrawPixel(Color.blue);
                     LemmingsShaderMathUtil.FixCollision(p, lemming.Position, pixel, (float2) ((Vector2) lemmingTemplate.transform.localScale), ref lemming);
                     if (DEBUG)
                         Debug.Break();
@@ -151,34 +152,34 @@ namespace Lemmings
                 lemming.Acceleration = float2.zero;
 
 
-                FixOutOfBounds(ref lemming, computeUV(lemming.Position));
+                FixOutOfBounds(ref lemming, ComputeUV(lemming.Position));
                 SimulationModel.lemmingList[index] = lemming;
             }
         }
 
 
-        public float2 computeUV(float2 position)
+        private float2 ComputeUV(float2 position)
         {
             return LemmingsShaderMathUtil.computeUV(position, SimulationModel.BotLeft, SimulationModel.TopRight);
         }
 
-        public float2 computePos(float2 uv)
+        private float2 ComputePos(float2 uv)
         {
             return LemmingsShaderMathUtil.computePos(uv, SimulationModel.BotLeft, SimulationModel.TopRight);
         }
 
-        public float2 computePixelUV(float2 uv, float2 d)
+        private float2 ComputePixelUV(float2 uv, float2 d)
         {
             return LemmingsShaderMathUtil.computePixelUV(uv, d, terrainController.TerrainBitRT.width, terrainController.TerrainBitRT.height);
         }
 
-        public float2 computePixel(float2 uv)
+        private float2 ComputePixel(float2 uv)
         {
             return LemmingsShaderMathUtil.computePixel(uv, terrainController.TerrainBitRT.width, terrainController.TerrainBitRT.height);
         }
 
 
-        void FixOutOfBounds(ref LemmingKinematicModel lemming, float2 posUV)
+        private void FixOutOfBounds(ref LemmingKinematicModel lemming, float2 posUV)
         {
             lemming.Velocity.x = posUV.x >= 1 ? -lemming.Velocity.x : lemming.Velocity.x;
             lemming.Velocity.x = posUV.x <= 0 ? -lemming.Velocity.x : lemming.Velocity.x;
@@ -208,13 +209,6 @@ namespace Lemmings
             Canvas.worldCamera = Camera.main;
         }
 
-        public static Color GetPixelFromUV(Texture2D rTex, float2 uv)
-        {
-            int x = Mathf.FloorToInt(uv.x * rTex.width);
-            int y = Mathf.FloorToInt(uv.y * rTex.height);
-            return rTex.GetPixel(x, y);
-        }
-
         private void PrepareTerrainController()
         {
             terrainController = new TerrainSimulationController();
@@ -227,6 +221,18 @@ namespace Lemmings
             CollisionColors = Collision.GetPixels();
             SDF = terrainController.TerrainAnalysis.toTexture2D(terrainController.TerrainAnalysis.graphicsFormat);
             SDFColors = SDF.GetPixels();
+        }
+
+        private static Color GetPixelFromUV(Texture2D rTex, float2 uv)
+        {
+            int x = Mathf.FloorToInt(uv.x * rTex.width);
+            int y = Mathf.FloorToInt(uv.y * rTex.height);
+            return rTex.GetPixel(x, y);
+        }
+
+        private void OnDestroy()
+        {
+            SimulationModel.Dispose();
         }
     }
 }

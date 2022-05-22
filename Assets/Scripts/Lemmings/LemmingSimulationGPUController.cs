@@ -4,7 +4,7 @@ using UnityEngine.Rendering;
 
 namespace Lemmings
 {
-    public class LemmingSimulationController : MonoBehaviour
+    public class LemmingSimulationGPUController : MonoBehaviour
     {
         public Canvas Canvas;
         public LemmingSimulationModel SimulationModel;
