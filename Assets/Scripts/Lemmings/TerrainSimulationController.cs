@@ -40,7 +40,7 @@ namespace Lemmings
                 FillRenderTextures(i);
             }
 
-            // ApplyBlur(TerrainAnalysis, TerrainAnalysis);
+            //ApplyBlur(TerrainAnalysis, TerrainAnalysis);
 
             needsTerrainUpdate = true;
             UpdateTerrain();

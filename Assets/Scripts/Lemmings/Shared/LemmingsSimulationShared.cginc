@@ -3,6 +3,7 @@
 cbuffer once {float2 _texDimensions;float2 _MaxBound; float2 _MinBound; float _DeltaTime; uint
 _Instances;float2 _lemmingSize;};
 #define WorldSize (_MaxBound - _MinBound)
+#define PixelSize (WorldSize / _texDimensions)
 
 struct Lemming
 {
@@ -43,6 +44,19 @@ float2 computePixelUV(float2 uv, float2 d)
 {
     return (floor(uv * _texDimensions) + d) / _texDimensions;
 }
+
+float2 computePixel(float2 uv)
+{
+    return uv * _texDimensions;
+}
+
+float2 pointInSquarePerimeter(float2 p, float2 v, float2 min, float2 max)
+{
+    float2 nPos = clamp(p + v, min, max);
+    nPos = (nPos - min) / (max - min);
+    return (nPos * 2.0f - 1.0f) * (max - min) / 2;
+}
+
 
 //projection b over a
 float2 project(float2 b, float2 a)
@@ -141,4 +155,23 @@ bool Ray2Rect(rect r, float2 p0, float2 D, out float t, out float2 n)
     }
 
     return false;
+}
+
+float2 GetCardinalDirection(float2 p, float2 v, float2 Min, float2 Max)
+{
+    float2 nPos = clamp(p, Min, Max);
+    nPos = (nPos - Min) / (Max - Min);
+    nPos = nPos * 2.0f - 1.0f;
+    //float2 nPos = pointInSquarePerimeter(p, v, min, max);
+
+    nPos = normalize(nPos);
+    float2 absnv = abs(nPos);
+    float m = min(absnv.x, absnv.y);
+    float2 s = sign(nPos) * ceil(absnv - m);
+    if (s.x == s.y)
+    {
+        s = float2(0, 1) * -sign(v.y + 0.0001f);
+    }
+
+    return s;
 }

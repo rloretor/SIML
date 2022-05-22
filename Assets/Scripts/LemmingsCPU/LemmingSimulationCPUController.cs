@@ -116,7 +116,7 @@ namespace Lemmings
             Debug.DrawLine(p.ToVector2(), p.ToVector2() + c.ToVector2());
 
 
-            float2[] corners = new[] {p + c, p + new float2(0, -s.y)};
+            float2[] corners = new[] {p + c};
             Debug.DrawLine(p.ToVector2(), p.ToVector2() + c.ToVector2());
 
             Vector2 pixelSize = (SimulationModel.TopRight - SimulationModel.BotLeft) / new Vector2(SDF.width, SDF.height);

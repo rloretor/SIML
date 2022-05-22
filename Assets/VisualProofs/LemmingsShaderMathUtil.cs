@@ -209,7 +209,6 @@ namespace Test
             float2 displacement = proj + sign * (pixel.Size * 0.5f + lemmingSize * 0.5f);
 
             lemming.Position = pixel.Position + displacement;
-            //todo fix projected space]
             float L = math.length(lemming.Velocity);
             lemming.Velocity += (Vector2) math.abs(sign.yx * 0.01f);
 

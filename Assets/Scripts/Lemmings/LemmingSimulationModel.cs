@@ -81,6 +81,7 @@ namespace Lemmings
         {
             SimulationShader = null;
             SimulationRWBuffer?.Release();
+            SimulationRWBuffer?.Dispose();
             lemmingList = null;
         }
     }
