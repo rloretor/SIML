@@ -959,7 +959,7 @@ MonoBehaviour:
       type: 3}
   SceneModel:
     bounds: {fileID: 1348752547}
-    sceneBitMap: {fileID: 2800000, guid: 56b651b329c5d487a97b550c18aff083, type: 3}
+    sceneBitMap: {fileID: 2800000, guid: b11ae1af90a2a48248e1b4a3724cc184, type: 3}
   TerrainSimulationView: {fileID: 955732584}
 --- !u!1 &1919177655
 GameObject:

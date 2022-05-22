@@ -60,11 +60,4 @@ public static class TextureExtensions
         tex.Apply();
         return tex;
     }
-
-    public static Color GetPixelFromUV(this Texture2D rTex, float2 uv)
-    {
-        int x = Mathf.FloorToInt(uv.x * rTex.width);
-        int y = Mathf.FloorToInt(uv.y * rTex.height);
-        return rTex.GetPixel(x, y);
-    }
 }
