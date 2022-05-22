@@ -80,10 +80,10 @@ namespace LemmingsCPU
                 puv = (ComputeUV(t));
 
                 pixelPos = ComputePos(ComputePixelUV(puv, 0f));
-                pixel = Color.white * GetPixelFromUV(Collision, puv).r;
+                pixel = Color.white * GetCollisionPixelFromUV(puv).r;
                 if (pixel.r != 0f) continue;
 
-                var sdfColor = GetPixelFromUV(SDF, puv);
+                var sdfColor = GetSDFPixelFromUV(puv);
                 nsdf = math.normalize(new float2(sdfColor.r, sdfColor.g));
                 sdfPixelUV = ComputePixel(ComputePixelUV(puv + nsdf * sdfColor.b, 0.5f));
 
@@ -175,11 +175,21 @@ namespace LemmingsCPU
             SDFColors = SDF.GetPixels();
         }
 
-        private static Color GetPixelFromUV(Texture2D rTex, float2 uv)
+
+        private Color GetSDFPixelFromUV(float2 uv)
         {
-            int x = Mathf.FloorToInt(uv.x * rTex.width);
-            int y = Mathf.FloorToInt(uv.y * rTex.height);
-            return rTex.GetPixel(x, y);
+            int x = Mathf.FloorToInt(uv.x * SDF.width);
+            int y = Mathf.FloorToInt(uv.y * SDF.height);
+            int pixesln = y * SDF.width + x;
+            return SDFColors[pixesln];
+        }
+
+        private Color GetCollisionPixelFromUV(float2 uv)
+        {
+            int x = Mathf.FloorToInt(uv.x * Collision.width);
+            int y = Mathf.FloorToInt(uv.y * Collision.height);
+            int pixesln = y * Collision.width + x;
+            return CollisionColors[pixesln];
         }
 
         private void OnDestroy()
