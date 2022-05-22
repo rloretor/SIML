@@ -49,10 +49,9 @@ namespace Lemmings
             for (var i = 0; i < LemmingInstances; i++)
             {
                 var spawnPointId = (int) (i % (SpawnPoints.Length));
-                var direction = UnityEngine.Random.insideUnitCircle + Vector2.one * UnityEngine.Random.Range(0, 1.0f);
-                var pos = (Vector2) SpawnPoints[spawnPointId].position + direction; //  Bounds.UV(new Vector2(0.5f, 0.5f)); //Bounds.RandomPointInBounds();
-                //pos += Bounds.UV(new Vector2(UnityEngine.Random.Range(0, 1.0f), UnityEngine.Random.Range(0, 1.0f))); // Bounds.RandomPointInBounds();
-                var vel = direction;
+                var pos = ((RectTransform) SpawnPoints[spawnPointId].transform).UV(new Vector2(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f))); //  Bounds.UV(new Vector2(0.5f, 0.5f)); //Bounds.RandomPointInBounds();
+                var vel = UnityEngine.Random.insideUnitCircle + Vector2.one * UnityEngine.Random.Range(0, 1.0f);
+
                 lemmingList.Add(new LemmingKinematicModel()
                 {
                     Position = pos,

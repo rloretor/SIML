@@ -1,29 +1,15 @@
-using System.Collections.Generic;
+using Lemmings;
 using Test;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Rendering;
 using Color = UnityEngine.Color;
 using Vector2 = UnityEngine.Vector2;
 
-namespace Lemmings
+namespace LemmingsCPU
 {
-    public class LemmingSimulationCPUController : MonoBehaviour
+    public class LemmingSimulationCPUController : LemmingSimulationController
     {
-        public Canvas Canvas;
-        public LemmingSimulationModel SimulationModel;
-        public LemmingRenderingModel RenderingModel;
-
-        public GameObject lemmingTemplate;
-
         public bool DEBUG;
-        private List<GameObject> LemmingRepresentation;
-
-        [Header("Scene")] public BitMapSceneModel SceneModel;
-        public TerrainSimulationView TerrainSimulationView;
-        private TerrainSimulationController terrainController;
-
-        private bool simulate = false;
         private Texture2D Collision;
         private Texture2D SDF;
         private Color[] CollisionColors;
@@ -70,25 +56,9 @@ namespace Lemmings
                 }
             }
         }*/
-
-        private void Start()
-        {
-            SetCanvas();
-            PrepareTerrainController();
-            PrepareLemmings();
-            RenderingModel.Init(SimulationModel, terrainController, SceneModel);
-        }
-
-        public void Update()
-        {
-            SimulateLemmings();
-            Draw();
-        }
-
-
         LemmingsShaderMathUtil.Rect GetLemmingCollision(LemmingKinematicModel lemming)
         {
-            Vector3 transformLocalScale = lemmingTemplate.transform.localScale;
+            Vector3 transformLocalScale = RenderingModel.lemmingTemplate.transform.localScale;
             float2 s = new float2(transformLocalScale.x, transformLocalScale.y) / 2;
             float2 p = (float2) (lemming.Position + lemming.Velocity * Time.deltaTime);
             float2 c = LemmingsShaderMathUtil.pointInSquarePerimeter(lemming.Position, lemming.Velocity, (float2) lemming.Position - s, (float2) lemming.Position + s);
@@ -135,7 +105,7 @@ namespace Lemmings
             return collisionPixel;
         }
 
-        private void SimulateLemmings()
+        protected override void Simulate()
         {
             for (var index = 0; index < SimulationModel.lemmingList.Count; index++)
             {
@@ -147,7 +117,7 @@ namespace Lemmings
                 bool2 collides = pixel.Size != (float2) (Vector2.one * -1000 - Vector2.one * 1000);
                 if (collides.x || collides.y)
                 {
-                    LemmingsShaderMathUtil.FixCollision(p, lemming.Position, pixel, (float2) ((Vector2) lemmingTemplate.transform.localScale), ref lemming);
+                    LemmingsShaderMathUtil.FixCollision(p, lemming.Position, pixel, (float2) ((Vector2) RenderingModel.lemmingTemplate.transform.localScale), ref lemming);
                     if (DEBUG)
                         Debug.Break();
                 }
@@ -163,13 +133,6 @@ namespace Lemmings
             }
 
             SimulationModel.SimulationRWBuffer.SetData(SimulationModel.lemmingList);
-        }
-
-        private void Draw()
-        {
-            Graphics.DrawMeshInstancedProcedural(RenderingModel.LemmingTemplateMesh, 0, RenderingModel.LemmingMaterial,
-                SimulationModel.Bounds, SimulationModel.LemmingInstances, null, ShadowCastingMode.Off,
-                false);
         }
 
         private float2 ComputeUV(float2 position)
@@ -204,31 +167,8 @@ namespace Lemmings
             lemming.Position = pos;
         }
 
-        private void PrepareLemmings()
+        protected override void PrepareSimulator()
         {
-            //LemmingRepresentation = new List<GameObject>();
-            //for (int i = 0; i < SimulationModel.LemmingInstances; i++)
-            //{
-            //    var instance = GameObject.Instantiate(lemmingTemplate);
-            //    LemmingRepresentation.Add(instance);
-            //    instance.transform.position = SimulationModel.lemmingList[i].Position;
-            //}
-        }
-
-        private void SetCanvas()
-        {
-            Canvas.renderMode = RenderMode.ScreenSpaceCamera;
-            Canvas.worldCamera = Camera.main;
-        }
-
-        private void PrepareTerrainController()
-        {
-            terrainController = new TerrainSimulationController();
-            SceneModel sceneModel = new SDFSceneModel();
-            sceneModel.Init(SceneModel.SceneBitMap.width, SceneModel.SceneBitMap.height);
-            SimulationModel.Init();
-            terrainController.Init(SceneModel, TerrainSimulationView, SimulationModel.Bounds);
-
             Collision = terrainController.TerrainBitRT.toTexture2D();
             CollisionColors = Collision.GetPixels();
             SDF = terrainController.TerrainAnalysis.toTexture2D(terrainController.TerrainAnalysis.graphicsFormat);
