@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Test;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Rendering;
 using Color = UnityEngine.Color;
 using Vector2 = UnityEngine.Vector2;
 
@@ -11,6 +12,8 @@ namespace Lemmings
     {
         public Canvas Canvas;
         public LemmingSimulationModel SimulationModel;
+        public LemmingRenderingModel RenderingModel;
+
         public GameObject lemmingTemplate;
 
         public bool DEBUG;
@@ -73,11 +76,13 @@ namespace Lemmings
             SetCanvas();
             PrepareTerrainController();
             PrepareLemmings();
+            RenderingModel.Init(SimulationModel, terrainController, SceneModel);
         }
 
         public void Update()
         {
             SimulateLemmings();
+            Draw();
         }
 
 
@@ -134,7 +139,7 @@ namespace Lemmings
         {
             for (var index = 0; index < SimulationModel.lemmingList.Count; index++)
             {
-                LemmingRepresentation[index].transform.position = SimulationModel.lemmingList[index].Position;
+                //LemmingRepresentation[index].transform.position = SimulationModel.lemmingList[index].Position;
                 var lemming = SimulationModel.lemmingList[index];
 
                 float2 p = lemming.Position + lemming.Velocity * Time.deltaTime;
@@ -156,8 +161,16 @@ namespace Lemmings
                 FixOutOfBounds(ref lemming, ComputeUV(lemming.Position));
                 SimulationModel.lemmingList[index] = lemming;
             }
+
+            SimulationModel.SimulationRWBuffer.SetData(SimulationModel.lemmingList);
         }
 
+        private void Draw()
+        {
+            Graphics.DrawMeshInstancedProcedural(RenderingModel.LemmingTemplateMesh, 0, RenderingModel.LemmingMaterial,
+                SimulationModel.Bounds, SimulationModel.LemmingInstances, null, ShadowCastingMode.Off,
+                false);
+        }
 
         private float2 ComputeUV(float2 position)
         {
@@ -193,15 +206,13 @@ namespace Lemmings
 
         private void PrepareLemmings()
         {
-            LemmingRepresentation = new List<GameObject>();
-            for (int i = 0;
-                i < SimulationModel.LemmingInstances;
-                i++)
-            {
-                var instance = GameObject.Instantiate(lemmingTemplate);
-                LemmingRepresentation.Add(instance);
-                instance.transform.position = SimulationModel.lemmingList[i].Position;
-            }
+            //LemmingRepresentation = new List<GameObject>();
+            //for (int i = 0; i < SimulationModel.LemmingInstances; i++)
+            //{
+            //    var instance = GameObject.Instantiate(lemmingTemplate);
+            //    LemmingRepresentation.Add(instance);
+            //    instance.transform.position = SimulationModel.lemmingList[i].Position;
+            //}
         }
 
         private void SetCanvas()
@@ -234,6 +245,7 @@ namespace Lemmings
         private void OnDestroy()
         {
             SimulationModel.Dispose();
+            RenderingModel?.Dispose();
         }
     }
 }

@@ -791,6 +791,11 @@ MonoBehaviour:
     Bounds:
       m_Center: {x: 0, y: 0, z: 0}
       m_Extent: {x: 0, y: 0, z: 0}
+  RenderingModel:
+    LemmingTemplateMesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+    lemmingTemplate: {fileID: 1051787548}
+    LemmingInstancedShader: {fileID: 4800000, guid: 3147f2f01ac84f9e854a982a919feb9b,
+      type: 3}
   lemmingTemplate: {fileID: 1051787543}
   DEBUG: 0
   SceneModel:
