@@ -11,8 +11,10 @@ namespace Lemmings
         public Transform lemmingTemplate;
         public Shader LemmingInstancedShader;
         public Material LemmingMaterial { get; private set; } = null;
+        public Texture2D LemmingAnimationImage;
+        public int Frames;
 
-        public void Init(LemmingSimulationModel simulationModel, TerrainSimulationController controller, SceneModel sceneModel)
+        public void Init(LemmingSimulationModel simulationModel)
         {
             LemmingMaterial = new Material(LemmingInstancedShader)
             {
@@ -24,13 +26,9 @@ namespace Lemmings
 
             LemmingMaterial.SetBuffer("_LemmingsBuffer", simulationModel.SimulationRWBuffer);
             LemmingMaterial.SetInt(SharedVariablesModel.Instances, simulationModel.LemmingInstances);
-            if (controller != null)
-            {
-                LemmingMaterial.SetTexture(SharedVariablesModel.collisionBitMap, controller.TerrainBitRT);
-                LemmingMaterial.SetVector(SharedVariablesModel.MinBound, sceneModel.bounds.BotLeft());
-                LemmingMaterial.SetVector(SharedVariablesModel.MaxBound, sceneModel.bounds.TopRight());
-                LemmingMaterial.SetVector(SharedVariablesModel.LemmingSize, lemmingTemplate.localScale);
-            }
+            LemmingMaterial.SetInt("_animationFrames", Frames);
+            LemmingMaterial.SetTexture("_animationTexture", LemmingAnimationImage);
+            LemmingMaterial.SetVector(SharedVariablesModel.LemmingSize, lemmingTemplate.localScale);
         }
 
         public void Dispose()

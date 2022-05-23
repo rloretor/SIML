@@ -202,6 +202,7 @@ namespace Test
 
         public static void FixCollision(float2 position, float2 prevPos, Rect pixel, float2 lemmingSize, ref LemmingKinematicModel lemming)
         {
+            
             float2 sign = GetCardinalDirection(prevPos, lemming.Velocity, pixel.Position - pixel.Size * 0.5f, pixel.Position + pixel.Size * 0.5f);
 
             var proj = project((position - pixel.Position), sign.yx);

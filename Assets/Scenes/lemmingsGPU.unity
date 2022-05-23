@@ -210,7 +210,7 @@ RectTransform:
   m_GameObject: {fileID: 53463047}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 1954.7347}
-  m_LocalScale: {x: 1.5365337, y: 3.2396371, z: 0}
+  m_LocalScale: {x: 1.6616, y: 2.209928, z: 0}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 3
@@ -912,7 +912,7 @@ MonoBehaviour:
     - {fileID: 909743040}
     - {fileID: 1522032297}
     - {fileID: 1386119542}
-    LemmingInstances: 1048576
+    LemmingInstances: 8388608
     Bounds:
       m_Center: {x: 0, y: 0, z: 0}
       m_Extent: {x: 0, y: 0, z: 0}
@@ -921,6 +921,9 @@ MonoBehaviour:
     lemmingTemplate: {fileID: 53463051}
     LemmingInstancedShader: {fileID: 4800000, guid: 3147f2f01ac84f9e854a982a919feb9b,
       type: 3}
+    LemmingAnimationImage: {fileID: 2800000, guid: 4a1c9670d720942828dce6e71986d2e6,
+      type: 3}
+    Frames: 8
   SceneModel:
     bounds: {fileID: 1348752547}
     sceneBitMap: {fileID: 2800000, guid: b11ae1af90a2a48248e1b4a3724cc184, type: 3}

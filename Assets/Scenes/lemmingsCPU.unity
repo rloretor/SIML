@@ -337,7 +337,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.62585866}
   m_AnchorMax: {x: 1, y: 0.6334339}
-  m_AnchoredPosition: {x: 0.000030517578, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!1 &920503269
@@ -372,7 +372,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.39780256}
   m_AnchorMax: {x: 1, y: 0.41750628}
-  m_AnchoredPosition: {x: 0.000030517578, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!1 &955732580
@@ -547,7 +547,7 @@ RectTransform:
   m_GameObject: {fileID: 1051787543}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 1954.7347}
-  m_LocalScale: {x: 2.458454, y: 5.838828, z: 0}
+  m_LocalScale: {x: 1.7481, y: 2.324973, z: 0}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 3
@@ -822,7 +822,7 @@ MonoBehaviour:
     - {fileID: 771090585}
     - {fileID: 920503270}
     - {fileID: 1638717860}
-    LemmingInstances: 32768
+    LemmingInstances: 8192
     Bounds:
       m_Center: {x: 0, y: 0, z: 0}
       m_Extent: {x: 0, y: 0, z: 0}
@@ -831,6 +831,9 @@ MonoBehaviour:
     lemmingTemplate: {fileID: 1051787548}
     LemmingInstancedShader: {fileID: 4800000, guid: 3147f2f01ac84f9e854a982a919feb9b,
       type: 3}
+    LemmingAnimationImage: {fileID: 2800000, guid: 4a1c9670d720942828dce6e71986d2e6,
+      type: 3}
+    Frames: 8
   SceneModel:
     bounds: {fileID: 1348752547}
     sceneBitMap: {fileID: 2800000, guid: b11ae1af90a2a48248e1b4a3724cc184, type: 3}

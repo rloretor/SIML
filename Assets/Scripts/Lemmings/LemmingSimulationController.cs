@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Lemmings.Shared;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -16,14 +17,19 @@ namespace Lemmings
         protected TerrainSimulationController terrainController;
 
         protected bool simulate = false;
+        protected TimeLogger timeLogger;
 
         private void Start()
         {
+            timeLogger = new TimeLogger();
+            timeLogger.StartRecording("All");
+            timeLogger.StartRecording("Init");
             SetCanvas();
             PrepareTerrainController();
             SimulationModel.Init();
-            RenderingModel.Init(SimulationModel, terrainController, SceneModel);
+            RenderingModel.Init(SimulationModel);
             PrepareSimulator();
+            timeLogger.StopRecording("Init");
         }
 
         protected virtual void PrepareSimulator()
@@ -49,6 +55,8 @@ namespace Lemmings
 
         private void Update()
         {
+            timeLogger.StartRecording($"Update_{Time.frameCount}");
+
             if (Input.GetKey(KeyCode.Space))
             {
                 simulate = true;
@@ -58,6 +66,7 @@ namespace Lemmings
             Simulate();
             Draw();
             simulate = false;
+            timeLogger.StopRecording($"Update_{Time.frameCount}");
         }
 
 
@@ -75,8 +84,10 @@ namespace Lemmings
 
         protected virtual void Simulate()
         {
+            timeLogger.StartRecording($"Simulate_{Time.frameCount}");
             UpdateComputeShader();
             SimulationModel.SimulationShader.Dispatch(SimulationModel.ComputeKernel, SimulationModel.ThreadGroupSize, 1, 1);
+            timeLogger.StopRecording($"Simulate_{Time.frameCount}");
         }
 
         private void Draw()
@@ -88,7 +99,16 @@ namespace Lemmings
 
         private void OnDestroy()
         {
+            timeLogger.StopRecording("All");
+
+            var name = this.GetType().Name;
+            var instances = SimulationModel.LemmingInstances.ToString();
+            timeLogger.ToCSV($"{name}_{instances}");
+
+            timeLogger = null;
             SimulationModel.Dispose();
+
+
             RenderingModel.Dispose();
         }
     }

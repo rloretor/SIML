@@ -1,3 +1,4 @@
+using System;
 using Lemmings;
 using Test;
 using Unity.Mathematics;
@@ -58,6 +59,7 @@ namespace LemmingsCPU
         }*/
         LemmingsShaderMathUtil.Rect GetLemmingCollision(LemmingKinematicModel lemming)
         {
+            timeLogger.StartRecording($"GetLemmingCollision_{Time.frameCount}");
             Vector3 transformLocalScale = RenderingModel.lemmingTemplate.transform.localScale;
             float2 s = new float2(transformLocalScale.x, transformLocalScale.y) / 2;
             float2 p = (float2) (lemming.Position + lemming.Velocity * Time.deltaTime);
@@ -102,11 +104,13 @@ namespace LemmingsCPU
             LemmingsShaderMathUtil.Rect collisionPixel = new LemmingsShaderMathUtil.Rect();
             collisionPixel.Position = (max + min) / 2.0f;
             collisionPixel.Size = max - min;
+            timeLogger.StopRecording($"GetLemmingCollision_{Time.frameCount}");
             return collisionPixel;
         }
 
         protected override void Simulate()
         {
+            timeLogger.StartRecording($"Simulate_{Time.frameCount}");
             for (var index = 0; index < SimulationModel.lemmingList.Count; index++)
             {
                 //LemmingRepresentation[index].transform.position = SimulationModel.lemmingList[index].Position;
@@ -117,21 +121,26 @@ namespace LemmingsCPU
                 bool2 collides = pixel.Size != (float2) (Vector2.one * -1000 - Vector2.one * 1000);
                 if (collides.x || collides.y)
                 {
+                    timeLogger.StartRecording($"FixCollision_{Time.frameCount}");
                     LemmingsShaderMathUtil.FixCollision(p, lemming.Position, pixel, (float2) ((Vector2) RenderingModel.lemmingTemplate.transform.localScale), ref lemming);
+                    timeLogger.StopRecording($"FixCollision_{Time.frameCount}");
+
                     if (DEBUG)
                         Debug.Break();
                 }
 
+                timeLogger.StartRecording($"Kinematic_{Time.frameCount}");
                 lemming.Acceleration = -new float2(0, Gravity);
                 lemming.Velocity += lemming.Acceleration * Time.deltaTime;
                 lemming.Position += lemming.Velocity * Time.deltaTime;
                 lemming.Acceleration = float2.zero;
-
-
                 FixOutOfBounds(ref lemming, ComputeUV(lemming.Position));
+                timeLogger.StopRecording($"Kinematic_{Time.frameCount}");
+
                 SimulationModel.lemmingList[index] = lemming;
             }
 
+            timeLogger.StopRecording($"Simulate_{Time.frameCount}");
             SimulationModel.SimulationRWBuffer.SetData(SimulationModel.lemmingList);
         }
 
@@ -181,6 +190,8 @@ namespace LemmingsCPU
             int x = Mathf.FloorToInt(uv.x * SDF.width);
             int y = Mathf.FloorToInt(uv.y * SDF.height);
             int pixesln = y * SDF.width + x;
+            pixesln = Mathf.Clamp(pixesln, 0, SDF.width * SDF.height - 1);
+
             return SDFColors[pixesln];
         }
 
@@ -189,13 +200,8 @@ namespace LemmingsCPU
             int x = Mathf.FloorToInt(uv.x * Collision.width);
             int y = Mathf.FloorToInt(uv.y * Collision.height);
             int pixesln = y * Collision.width + x;
+            pixesln = Mathf.Clamp(pixesln, 0, Collision.width * Collision.height - 1);
             return CollisionColors[pixesln];
-        }
-
-        private void OnDestroy()
-        {
-            SimulationModel.Dispose();
-            RenderingModel?.Dispose();
         }
     }
 }

@@ -60,6 +60,11 @@ rect GetLemmingCollision(Lemming lemming)
     return collisionPixel;
 }
 
+bool IsNaN(float x)
+{
+    return (asuint(x) & 0x7fffffff) > 0x7f800000;
+}
+
 
 void FixCollision(float2 projPos, float2 currPos, rect pixel, inout Lemming lemming)
 {
@@ -70,13 +75,17 @@ void FixCollision(float2 projPos, float2 currPos, rect pixel, inout Lemming lemm
     float2 displacement = proj + Sign * (hs + _lemmingSize * 0.5f);
 
 
-    lemming.Position = pixel.Position + displacement;
-    float L = length(lemming.Velocity);
-    lemming.Velocity = 0;
-    lemming.Velocity += abs(Sign.yx * 0.01f);
+    float2 x = pixel.Position + displacement;
+    if (IsNaN(x) == false)
+    {
+        lemming.Position = x;
+        float L = length(lemming.Velocity);
+        lemming.Velocity = 0;
+        lemming.Velocity += abs(Sign.yx * 0.01f);
 
-    lemming.Velocity = normalize(abs(Sign.yx)) * lemming.Velocity;
-    lemming.Velocity = normalize(lemming.Velocity) * clamp(L, 0, _lemmingSize.x * 2);
+        lemming.Velocity = normalize(abs(Sign.yx)) * lemming.Velocity;
+        lemming.Velocity = normalize(lemming.Velocity) * clamp(L, 0, _lemmingSize.x * 2);
+    }
 }
 
 [numthreads(512,1,1)]
