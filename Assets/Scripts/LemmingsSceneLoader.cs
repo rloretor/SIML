@@ -12,6 +12,7 @@ public class LemmingsSceneLoader : MonoBehaviour
     public Button CPUButton;
     public Button GPUButton;
     public TMP_InputField lemmingsInput;
+    public TMP_Text path;
 
     private int lemmingsAmount;
 
@@ -28,6 +29,7 @@ public class LemmingsSceneLoader : MonoBehaviour
         MainCanvas.interactable = true;
         AddListeners();
         ToggleButtons(false);
+        path.text = "Los resultados basicos de tiempo se almacenaran en: " + Application.persistentDataPath;
     }
 
     public void AddListeners()

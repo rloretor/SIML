@@ -18,7 +18,7 @@ Shader "Instanced/DebugDrawTerrain"
             #pragma target 4.5
 
             #include "AutoLight.cginc"
-            #include "../Shared/LemmingsSimulationShared.cginc"
+            #include "LemmingsSimulationShared.cginc"
             uint _instances;
 
             sampler2D _collisionBitMap;

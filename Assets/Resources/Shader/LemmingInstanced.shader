@@ -18,7 +18,7 @@ Shader "Instanced/LemmingInstanced"
             #pragma target 4.5
 
             #include "AutoLight.cginc"
-            #include "../Shared/LemmingsSimulationShared.cginc"
+            #include "LemmingsSimulationShared.cginc"
 
 
             StructuredBuffer<Lemming> _LemmingsBuffer;
@@ -55,7 +55,7 @@ Shader "Instanced/LemmingInstanced"
                 v.vertex.y -= _lemmingSize * 0.1;
                 v.uv.y /= _animationFrames;
                 v.uv.y -= frac(floor(_Time.y * lemming.Velocity.x * _animationFrames + instanceID) / _animationFrames);
-                v.uv.x *= sign(lemming.Velocity.x+0.001);
+                v.uv.x *= sign(lemming.Velocity.x + 0.001);
                 o.uv = v.uv;
                 o.vertex = mul(UNITY_MATRIX_VP, v.vertex);
                 o.data = float4(lemming.Acceleration.xy, instanceID, 0);

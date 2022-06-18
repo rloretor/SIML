@@ -19,7 +19,7 @@
             #pragma fragment frag
 
             #include "UnityCG.cginc"
-            #include "Assets/Scripts/Lemmings/Shared/LemmingsSimulationShared.cginc"
+            #include "../../Shader/LemmingsSimulationShared.cginc"
 
             struct appdata
             {

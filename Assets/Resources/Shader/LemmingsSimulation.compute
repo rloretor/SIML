@@ -1,5 +1,5 @@
 ﻿#pragma kernel LemmingsMovementPassKernel
-#include "../Shared/LemmingsSimulationShared.cginc"
+#include "LemmingsSimulationShared.cginc"
 
 RWStructuredBuffer<Lemming> _Lemmings;
 Texture2D _collisionBitMap;

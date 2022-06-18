@@ -2,7 +2,7 @@
 #pragma kernel Ray2RayKernel
 #pragma kernel Ray2BoxKernel
 
-#include "Assets/Scripts/Lemmings/Shared/LemmingsSimulationShared.cginc"
+#include "../../../Resources/Shader/LemmingsSimulationShared.cginc"
 
 struct RayBox
 {

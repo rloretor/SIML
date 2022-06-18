@@ -44,6 +44,6 @@ public class TimeLogger
         );
         var s = DateTime.Now.ToString("o");
         s.Replace(":", "-");
-        System.IO.File.WriteAllText($"{Application.dataPath}/measurements_{name}_{s}.csv", csv);
+        System.IO.File.WriteAllText($"{Application.persistentDataPath}/measurements_{name}_{s}.csv", csv);
     }
 }
