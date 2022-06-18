@@ -202,13 +202,12 @@ namespace Test
 
         public static void FixCollision(float2 position, float2 prevPos, Rect pixel, float2 lemmingSize, ref LemmingKinematicModel lemming)
         {
-            
             float2 sign = GetCardinalDirection(prevPos, lemming.Velocity, pixel.Position - pixel.Size * 0.5f, pixel.Position + pixel.Size * 0.5f);
 
             var proj = project((position - pixel.Position), sign.yx);
             // proj = UnityEngine.Random.Range(1.02f, 1.3f) * proj;
             float2 displacement = proj + sign * (pixel.Size * 0.5f + lemmingSize * 0.5f);
-
+//normalization missing
             lemming.Position = pixel.Position + displacement;
             float L = math.length(lemming.Velocity);
             lemming.Velocity += (Vector2) math.abs(sign.yx * 0.01f);

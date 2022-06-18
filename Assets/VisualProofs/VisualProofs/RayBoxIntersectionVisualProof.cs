@@ -110,6 +110,7 @@ namespace Test.VisualProofs
 
         private void DrawIntersection(Vector2 origin, Vector2 direction, Vector2 center, Vector2 size, Vector2 displacement)
         {
+#if unity_editor
             Vector2 p0 = displacement + origin;
             Vector2 d0 = direction;
             Vector2 p1 = displacement + center;
@@ -142,6 +143,7 @@ namespace Test.VisualProofs
             Gizmos.DrawWireCube(p1, s);
             Gizmos.DrawLine(p0, p0 + d0);
             Gizmos.DrawIcon(p0 + d0, "winbtn_win_max_h", true, Gizmos.color);
+#endif
         }
     }
 }

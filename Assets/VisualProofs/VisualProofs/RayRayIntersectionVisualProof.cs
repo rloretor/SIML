@@ -72,6 +72,7 @@ namespace Test.VisualProofs
 
         private void DrawIntersection(Vector2 origin, Vector2 direction, Vector2 origin1, Vector2 direction1)
         {
+#if UNITY_EDITOR
             LemmingsShaderMathUtil util = new LemmingsShaderMathUtil();
             float t = util.Ray2Ray(origin, direction, origin1, direction1);
 
@@ -93,6 +94,7 @@ namespace Test.VisualProofs
             }
 
             Gizmos.DrawSphere(origin + direction * t, 0.1f);
+#endif
         }
     }
 }
