@@ -70,17 +70,16 @@ void FixCollision(float2 projPos, float2 currPos, rect pixel, inout Lemming lemm
 {
     float2 hs = pixel.Size * 0.5;
     float2 Sign = GetCardinalDirection(currPos, lemming.Velocity, pixel.Position - hs, pixel.Position + hs);
-
+    //normalization missing
     float2 proj = project((projPos - pixel.Position), Sign.yx);
     float2 displacement = proj + Sign * (hs + _lemmingSize * 0.5f);
-
 
     float2 x = pixel.Position + displacement;
     if (IsNaN(x) == false)
     {
         lemming.Position = x;
         float L = length(lemming.Velocity);
-        lemming.Velocity = 0;
+        //lemming.Velocity = 0;
         lemming.Velocity += abs(Sign.yx * 0.01f);
 
         lemming.Velocity = normalize(abs(Sign.yx)) * lemming.Velocity;
@@ -91,24 +90,21 @@ void FixCollision(float2 projPos, float2 currPos, rect pixel, inout Lemming lemm
 [numthreads(512,1,1)]
 void LemmingsMovementPassKernel(uint3 id : SV_DispatchThreadID)
 {
-    // if (_Simulate)
+    Lemming lemming = _Lemmings[id.x];
+    rect pixel = GetLemmingCollision(lemming);
+    float2 p = lemming.Position + lemming.Velocity * _DeltaTime;
+
+    bool2 collides = pixel.Size != float2(-1000 - 1000, -1000 - 1000);
+    if (collides.x || collides.y)
     {
-        Lemming lemming = _Lemmings[id.x];
-        rect pixel = GetLemmingCollision(lemming);
-        float2 p = lemming.Position + lemming.Velocity * _DeltaTime;
-
-        bool2 collides = pixel.Size != (-1000 - 1000);
-        if (collides.x || collides.y)
-        {
-            FixCollision(p, lemming.Position, pixel, lemming);
-        }
-
-        lemming.Acceleration = -float2(0, Gravity);
-        lemming.Velocity += lemming.Acceleration * _DeltaTime;
-        lemming.Position += lemming.Velocity * _DeltaTime;
-        lemming.Acceleration = 0;
-
-        FixOutOfBounds(lemming, computeUV(lemming.Position));
-        _Lemmings[id.x] = lemming;
+        FixCollision(p, lemming.Position, pixel, lemming);
     }
+
+    lemming.Acceleration = -float2(0, Gravity);
+    lemming.Velocity += lemming.Acceleration * _DeltaTime;
+    lemming.Position += lemming.Velocity * _DeltaTime;
+    lemming.Acceleration = 0;
+
+    FixOutOfBounds(lemming, computeUV(lemming.Position));
+    _Lemmings[id.x] = lemming;
 }

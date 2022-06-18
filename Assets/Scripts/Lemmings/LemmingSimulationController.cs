@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using Lemmings.Shared;
 using UnityEngine;
@@ -57,16 +58,16 @@ namespace Lemmings
         {
             timeLogger.StartRecording($"Update_{Time.frameCount}");
 
-            if (Input.GetKey(KeyCode.Space))
-            {
-                simulate = true;
-            }
 
             terrainController.UpdateTerrain();
-            Simulate();
             Draw();
             simulate = false;
             timeLogger.StopRecording($"Update_{Time.frameCount}");
+        }
+
+        private void FixedUpdate()
+        {
+            Simulate();
         }
 
 
@@ -76,7 +77,7 @@ namespace Lemmings
             SimulationModel.SimulationShader.SetVector(SharedVariablesModel.MaxBound, SimulationModel.TopRight);
             SimulationModel.SimulationShader.SetVector(SharedVariablesModel.MinBound, SimulationModel.BotLeft);
             SimulationModel.SimulationShader.SetVector(SharedVariablesModel.TexDimensions, new Vector2(terrainController.TerrainAnalysis.width, terrainController.TerrainAnalysis.height));
-            SimulationModel.SimulationShader.SetFloat(SharedVariablesModel.DeltaTime, Time.deltaTime);
+            SimulationModel.SimulationShader.SetFloat(SharedVariablesModel.DeltaTime, Time.fixedDeltaTime);
             SimulationModel.SimulationShader.SetVector(SharedVariablesModel.LemmingSize, RenderingModel.lemmingTemplate.localScale);
             SimulationModel.SimulationShader.SetTexture(SimulationModel.ComputeKernel, SharedVariablesModel.collisionBitMap, terrainController.TerrainBitRT);
             SimulationModel.SimulationShader.SetTexture(SimulationModel.ComputeKernel, SharedVariablesModel.terrainAnalysisTexture, terrainController.TerrainAnalysis);
@@ -84,10 +85,10 @@ namespace Lemmings
 
         protected virtual void Simulate()
         {
-            timeLogger.StartRecording($"Simulate_{Time.frameCount}");
+            //timeLogger.StartRecording($"Simulate_{Time.frameCount}");
             UpdateComputeShader();
             SimulationModel.SimulationShader.Dispatch(SimulationModel.ComputeKernel, SimulationModel.ThreadGroupSize, 1, 1);
-            timeLogger.StopRecording($"Simulate_{Time.frameCount}");
+            //timeLogger.StopRecording($"Simulate_{Time.frameCount}");
         }
 
         private void Draw()
