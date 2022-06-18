@@ -38,7 +38,7 @@ public class JumpFloodAlgorithmTex : JumpFloodAlgorithmBase<Texture2D>
         var processTexture = new Texture2D(Width, Height, TextureFormat.RGBA32, false, true)
         {
             name = string.Format(SaveFileName, passNumber + 1 /*, step*/),
-            alphaIsTransparency = true,
+            // alphaIsTransparency = true,
             anisoLevel = 0,
             requestedMipmapLevel = 0
         };

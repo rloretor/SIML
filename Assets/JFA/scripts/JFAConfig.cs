@@ -38,7 +38,7 @@ public class JFAConfig
         set => format = value;
     }
 }
-
+#if UNITY_EDITOR
 [CustomEditor(typeof(JFAConfig))]
 public class JFAConfigEditor : Editor
 {
@@ -66,3 +66,4 @@ public class JFAConfigEditor : Editor
         serializedObject.ApplyModifiedProperties();
     }
 }
+#endif
