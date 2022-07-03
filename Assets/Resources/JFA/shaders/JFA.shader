@@ -49,7 +49,7 @@
             float4 frag(v2f i) : SV_Target
             {
                 _pass = clamp(_pass, 0.0, _maxPasses);
-                float2 step = floor(exp2(_maxPasses - _pass)) * _MainTex_TexelSize.xy;
+                float2 step = floor(exp2(_maxPasses - _pass));
                 float minDist = 999999999;
                 float2 bestpos = 0;
                 float dist = 0;
@@ -59,10 +59,11 @@
                 {
                     for (float x = -1; x <= 1; x += 1)
                     {
-                        float2 sampleCoord = i.uv + float2(x, y) * step;
-                        float3 sampleData = tex2Dlod(_MainTex, float4(sampleCoord, 0, 0)).xyz;
+                        float2 sampleCoord = i.uv + float2(x, y) * step * _MainTex_TexelSize.xy;
+                        sampleCoord = clamp(sampleCoord, 0, 1);
+                        float3 sampleData = tex2D(_MainTex, sampleCoord).xyz;
                         dist = distance(sampleData.xy, i.uv);
-                        if ((sampleData.z >= 0.0000000001) && dist < minDist)
+                        if ((sampleData.z != 0) && dist < minDist)
                         {
                             minDist = dist;
                             bestpos = sampleData.xy;

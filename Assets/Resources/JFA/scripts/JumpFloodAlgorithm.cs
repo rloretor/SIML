@@ -46,6 +46,7 @@ public class JumpFloodAlgorithmBase<T> where T : Texture
             Pass(passNumber, source, dest);
             (source, dest) = (dest, source);
             Debug.Log("swap " + passNumber);
+            Debug.Log(Mathf.Clamp(passNumber, 0, passes));
         }
 
         RenderTexture result = new RenderTexture(width, height, 0, format);

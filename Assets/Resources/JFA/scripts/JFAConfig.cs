@@ -8,7 +8,7 @@ using UnityEngine.UI;
 public class JFAConfig
 {
     public static string SaveFileName = "Result_{0:00}";
-    public static string SavePath => $"{Application.dataPath}/JFA/Results";
+    public static string SavePath => $"{Application.dataPath}/Resources/JFA/Results";
     [SerializeField] private int maxPasses;
     [SerializeField] private bool forceMaxPasses;
     [SerializeField] private bool recordProcess;

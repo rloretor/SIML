@@ -117,8 +117,7 @@ namespace JFA.scripts.editor
                 RenderTexture.active = temp;
                 tex2.ReadPixels(new Rect(0, 0, temp.width, temp.height), 0, 0);
                 tex2.Apply();
-                tex2.SaveAsPng($"{Application.dataPath}/JFA/");
-                tex2.SaveAsJpg($"{Application.dataPath}/JFA/");
+                tex2.SaveAsPng($"{Application.dataPath}/Resources/JFA/");
                 RenderTexture.active = null;
                 temp.Release();
             }

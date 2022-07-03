@@ -45,11 +45,10 @@
             uniform bool pack;
             int bitOnValue;
 
-            uniform int negative;
 
-
-            #define cell(uv) tex2D(_MainTex, uv).xyz
-            #define D(uv) sign(negative) * length(cell(uv)-uv)
+            #define T(uv) tex2Dlod(_MainTex,float4(uv,0,0))
+            #define cell(uv) T( uv).xyz
+            #define D(uv) (length(cell(uv).xy-uv) )
 
             v2f vert(appdata v)
             {
@@ -90,8 +89,20 @@
             }
 
 
+            float2 Central_Diff(float2 uv)
+            {
+                float2 d = float2(1, 0);
+                float2 right = uv + d.xy * _MainTex_TexelSize;
+                float2 left = uv - d.xy * _MainTex_TexelSize;
+                float2 top = uv + d.yx * _MainTex_TexelSize;
+                float2 bot = uv - d.yx * _MainTex_TexelSize;
+                return normalize(float2(D(right) - D(left), D(top) - D(bot)) / 2.0);
+            }
+
+
             float4 frag(v2f i) : SV_Target
             {
+ 
                 if (showDistance)
                 {
                     return D(i.uv);
@@ -103,6 +114,10 @@
                 if (boxFilterDistance)
                 {
                     return BoxFilter(i.uv);
+                }
+                if (flow)
+                {
+                    return float4(Central_Diff(i.uv) * 0.5 + 0.5, 0, 0);
                 }
 
                 return float4(cell(i.uv).xyz, 1); //float4(hash31((cell(i.uv).z) * 1013), 1);
